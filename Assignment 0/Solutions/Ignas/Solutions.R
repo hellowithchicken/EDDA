@@ -1,6 +1,6 @@
 library(tidyverse)
 library(rstudioapi) 
-## set wd as wource file location
+## set wd as source file location
 setwd(dirname(getActiveDocumentContext()$path))
 ###------Exercise 1-------
 
