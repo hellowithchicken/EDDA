@@ -1,9 +1,11 @@
+library(tidyverse)
+library(rstudioapi) 
 
 ##################################### Exercise 1 #####################################
+#setwd("C:/Users/KGulp/oneDrive/Documenten/Computational Science/Experimental design and data analysis/R_data")
+setwd(dirname(getActiveDocumentContext()$path))
 getwd()
-setwd("C:/Users/KGulp/oneDrive/Documenten/Computational Science/Experimental design and data analysis/R_data")
-data=read.table(file="birthweight.txt",header=TRUE)
-data
+data=read.table(file="data/birthweight.txt",header=TRUE)
 
 bw = data$birthweight
 hist(bw)
@@ -90,7 +92,7 @@ length(se)
 plot(se,power, main = "100 - 5")
 
 ############################### 2c ################################
-par(mfrow=c(1,3)
+par(mfrow=c(1,3))
 ########################################## 2b ###############################
 n = 30
 m = 30
