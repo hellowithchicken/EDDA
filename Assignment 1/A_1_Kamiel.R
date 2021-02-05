@@ -1,9 +1,7 @@
 
 ##################################### Exercise 1 #####################################
-getwd()
-setwd("C:/Users/KGulp/oneDrive/Documenten/Computational Science/Experimental design and data analysis/R_data")
+setwd(getwd())
 data=read.table(file="birthweight.txt",header=TRUE)
-data
 
 bw = data$birthweight
 hist(bw)
@@ -90,7 +88,7 @@ length(se)
 plot(se,power, main = "100 - 5")
 
 ############################### 2c ################################
-par(mfrow=c(1,3)
+par(mfrow=c(1,3))
 ########################################## 2b ###############################
 n = 30
 m = 30
@@ -108,7 +106,9 @@ se = seq(175,185,by=0.25)
 power = numeric(length(se))
 
 
-# We  now  study  thep-value  and  thepower functionof  thet-test.   The  power  function  gives,  for  everygiven set of parameters (n,m,??,??,sd), the probability that thet-test rejects the null hypothesis. 
+# We  now  study  thep-value  and  thepower functionof  thet-test.   
+# The  power  function  gives,  for  everygiven set of parameters (n,m,??,??,sd), 
+# the probability that thet-test rejects the null hypothesis. 
 for (n in  1:length(se)){
   for (i in 1:1000){
     nu = se[n]
