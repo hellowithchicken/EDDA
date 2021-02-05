@@ -1,7 +1,11 @@
+library(tidyverse)
+library(rstudioapi) 
 
 ##################################### Exercise 1 #####################################
-setwd(getwd())
-data=read.table(file="birthweight.txt",header=TRUE)
+#setwd("C:/Users/KGulp/oneDrive/Documenten/Computational Science/Experimental design and data analysis/R_data")
+setwd(dirname(getActiveDocumentContext()$path))
+getwd()
+data=read.table(file="data/birthweight.txt",header=TRUE)
 
 bw = data$birthweight
 hist(bw)
