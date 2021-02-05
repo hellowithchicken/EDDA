@@ -132,3 +132,6 @@ bills
 hist(bills)
 qqnorm(bills)
 boxplot(bills)
+
+hist(data, probability = T)
+
