@@ -1,14 +1,19 @@
 library(tidyverse)
 library(rstudioapi) 
 
-bootstarp <- function(data, n, fun = mean) {
+bootstarp <- function(data, fun = mean) {
   results <- c()
+  statistic = fun(data)
   n = length(data)
   for (i in 1:n){
-    bs_sample <- sample(data$Bills, size = n, replace = T)
+    bs_sample <- sample(data, size = n, replace = T)
+    results <- c(results, fun(bs_sample))
   }
-  results <- c(results, fun(bs_sample))
-  return(results)
+  CI_25=quantile(results,0.025)
+  CI_975=quantile(results,0.975)
+  CI = c(2*statistic-CI_975,2*statistic-CI_25)
+  return_list <- list(statistic, results, CI)
+  return(return_list)
 }
 
 
@@ -23,7 +28,7 @@ ggplot(data, aes(x=Bills)) +
 # b - do bootstrap
 
 p_values <- c()
-lambdas <- seq(0.01, 0.1, 0.000001)
+lambdas <- seq(0.01, 0.1, 0.0001)
 for (lambda in lambdas){
   B <- 1000
   tstar=numeric(B)
@@ -41,4 +46,10 @@ for (lambda in lambdas){
 }
 
 df_lambdas <- tibble(lambdas, p_values)
-plot(lambdas, p_values)
+
+ggplot(df_lambdas, aes(x = lambdas, y = p_values)) +
+  geom_point()
+
+# c - bootstrap confidence interval
+
+bootstarp(data$Bills, median)
