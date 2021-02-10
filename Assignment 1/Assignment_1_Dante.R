@@ -108,38 +108,27 @@ boxplot(data_tele)
 # idea if the manager arranges the prices better.
 
 # B
-B <- 1000
-T1 <- median(data_tele)
-Tstar <- numeric(B)
-for (i in 1:B){
-  Xstar <- sample(data_tele,replace=TRUE)
-  Tstar[i] <- median(Xstar)
+X <- seq(0.01, 0.1, 0.0005)
+pvalues <- c()
+t <- median(data_tele)
+for (x in X){
+  B <- 1000
+  tstar <- numeric(B)
+  n <- length(data_tele)
+  
+  for (i in 1:B){
+    xstar <- rexp(n,x)
+    tstar[i] <- median(xstar)
+  }
+  pl<-sum(tstar<t)/B
+  pr<-sum(tstar>t)/B
+  p<-2*min(pl,pr)
+  pl;pr;p
+  pvalues <- c(pvalues,p)
 }
-Tstar25 <- quantile(Tstar,0.025)
-Tstar975 <- quantile(Tstar, 0.975)
-
-c(2*T1-Tstar975, 2*T1-Tstar25)
-
-hist(data_tele, prob=T, ylim=c(0,0.05))
-x<-seq(0,max(data_tele),length=1000)
-lines(x,dexp(0.08*x),type="l",col="blue",lwd=2)
-
-# t <- max(data_tele)
-# tstar <- numeric(B)
-# 
-# n <- length(data_tele)
-# for (i in 1:B){
-#   xstar <- rexp(n,1)
-#   tstar[i] <- max(xstar)
-# }
-# hist(tstar, prob = T)
-# 
-# hist(tstar,prob=T,ylim=c(0,0.4),main="histogram of tstar & true density curve of T")
-# densmaxexp=function(x,n) n*exp(-x)*(1-exp(-x))^(n-1)
-# # lines(rep(t,2),seq(0,2*densmaxexp(t,n),length=2),type="l", col="red", lwd=3)
-# # axis(1,t,expression(paste("t") ) )
-# u=seq(0,max(tstar),length=1000)
-# lines(u,densmaxexp(u,n),type="l",col="blue")
+pvalues
+plot(X, pvalues)
+# There exist a Exp function that fits the hypothesis
 
 # C
 B <- 1000
@@ -154,3 +143,76 @@ Tstar975 <- quantile(Tstar, 0.975)
 
 T1
 c(2*T1-Tstar975, 2*T1-Tstar25)
+
+hist(data_tele, prob=T, ylim=c(0,0.05))
+x<-seq(0,max(data_tele),length=1000)
+lines(x,exp(x),type="l",col="blue",lwd=2)
+
+# D 
+
+max_index <- which.max(pvalues)
+
+opt_X <- X[max_index]
+
+# Opt_X represents the optimal Lambda
+
+# E
+bill_bigeq40 <- sum(data_tele>=40)
+bill_smal40 <- sum(data_tele<40)
+
+binom.test(bill_bigeq40, length(data_tele),p=0.5)
+binom.test(bill_smal40, length(data_tele),p=0.5)
+
+bill_less10 <- sum(data_tele < 10)
+bill_less10/length(data_tele)
+
+# Exercise 4
+# A
+data_run <- read.table(file="data/run.txt", header=TRUE)
+
+plot(before~after,pch=drink,data=data_run)
+abline(0,1)
+boxplot(data_run[,1],data_run[,2])
+boxplot(data_run[,1]-data_run[,2])
+
+qqnorm(data_run[,1]-data_run[,2])
+shapiro.test(data_run[,1]-data_run[,2])
+# normality assumed
+
+cor.test(data_run[,1],data_run[,2])
+# significant correlation
+
+# B
+
+data_run_lemo <- data_run[data_run[,"drink" ]=="lemo",]
+data_run_energy <- data_run[data_run[,"drink" ]=="energy",]
+
+t.test(data_run_lemo[,1], data_run_lemo[,2],paired=TRUE)
+# Is the same as
+t.test(data_run_lemo[,1]-data_run_lemo[,2])
+# Negative
+
+t.test(data_run_energy[,1]-data_run_energy[,2])
+# Positive
+
+# C
+data_run$dif <- data_run[,1]-data_run[,2]
+data_run_lemo <- data_run[data_run[,"drink" ]=="lemo",]
+data_run_energy <- data_run[data_run[,"drink" ]=="energy",]
+
+t.test(data_run_lemo$dif, data_run_energy$dif)
+qqnorm(data_run_lemo$dif)
+qqnorm(data_run_energy$dif) # Not really normal so other test
+
+wilcox.test(data_run_lemo$dif, data_run_energy$dif)
+ks.test(data_run_lemo$dif, data_run_energy$dif)
+
+# D
+# For experiment B there is no comparison done between the
+# two groups lemo and energy. The test will therefore not 
+# give any usefull results. For experiment C it is perhaps 
+# better to use another test?
+
+# Exercise 5
+# A
+
