@@ -215,4 +215,18 @@ ks.test(data_run_lemo$dif, data_run_energy$dif)
 
 # Exercise 5
 # A
+data_chick <- chickwts
+chick_meat <- subset(data_chick, feed == "meatmeal")
+chick_sunf <- subset(data_chick, feed == "sunflower")
+# Subsets are not paired and independent
+
+t.test(chick_meat$weight,chick_sunf$weight)
+
+par(mfrow=c(1,2)) # set the plotting area into a 1*2 array
+qqnorm(chick_meat$weight)
+qqnorm(chick_sunf$weight) # Not really normal so:
+
+wilcox.test(chick_meat$weight,chick_sunf$weight)
+
+ks.test(chick_meat$weight,chick_sunf$weight)
 
