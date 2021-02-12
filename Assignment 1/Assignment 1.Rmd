@@ -13,6 +13,59 @@ knitr::opts_chunk$set(echo = TRUE)
 setwd(dirname(getActiveDocumentContext()$path))
 ```
 
+# Exercise 4
+
+## a)
+
+Disregarding the type of drink, test whether the run times before drink and after are correlated.
+
+```{r}
+data <- read.table(file="data/run.txt",header=TRUE)
+cor(data$before, data$after)
+```
+
+Run times before and after the drink seem to be positively correlated.
+
+## b)
+
+```{r}
+# calculate differences
+data <- data %>% 
+  mutate(diff = before - after)
+
+# filter for lemo
+
+lemo <- data %>% 
+  filter(drink == "lemo")
+
+t.test(lemo$before, lemo$after)
+
+# filter for energy
+
+energy <- data %>% 
+  filter(drink == "energy")
+
+t.test(energy$before, energy$after)
+```
+
+## c)
+
+For both energy and soft-drink groups there does not seem to be a significant difference in running times.
+
+```{r}
+
+# perform t-test
+
+t.test(lemo$diff, energy$diff)
+
+```
+The p-value is > 0.05 therefore the means of the two populations are not significantly different.
+
+## d)
+
+Can you think of a plausible objection to the design of the experiment in b) if the main aim was to test
+whether drinking the energy drink speeds up the running? Is there a similar objection to the design
+of the experiment in c)? Comment on all your fndings in this exercise.
 
 # Exercise 5
 
