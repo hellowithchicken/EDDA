@@ -48,9 +48,12 @@ energy <- data %>%
 t.test(energy$before, energy$after)
 ```
 
+For both energy and soft-drink groups there does not seem to be a significant difference in running times.
+
 ## c)
 
-For both energy and soft-drink groups there does not seem to be a significant difference in running times.
+For each pupil compute the time difference between the two running tasks. Test whether these time
+differences are effected by the type of drink.
 
 ```{r}
 
