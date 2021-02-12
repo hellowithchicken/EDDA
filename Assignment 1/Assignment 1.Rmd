@@ -7,7 +7,6 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-
 library(tidyverse)
 library(rstudioapi)
 library(pander)
@@ -20,8 +19,11 @@ setwd(dirname(getActiveDocumentContext()$path))
 ```
 
 # Exercise 1
+The data set birthweight.txt contains the birthweights of 188 newborn babies.  We are interested in finding the underlying (population) mean μ of birthweights.
 
-## a)
+**a)** Check normality of the data.  Compute a point estimate for μ.  Derive, assuming normality (irrespective of your conclusion about normality od the data), a bounded 90% confidence interval for μ.
+
+
 To check normality for the data we use a qqplot, historgram, box plot and shapiro-wilks test. 
 ```{r}
 par(mfrow=c(1,3))
@@ -38,22 +40,25 @@ The graphical methods show that the data is normal. The Shapiro-Wilk test reinfo
 
 ```{r}
 m = mean(bw)
-s = sd(bw)
+sd = sd(bw)
 n = length(bw)
-error = qnorm(0.95)*s/sqrt(n)
-error
+error = qnorm(0.95)*sd/sqrt(n)
 ci = c(m-error, m+error)
+m
 ci
 ```
 
 
-## b)
-A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an alpha of 0.1. The claim is fignificant for all alpha's above 0.014 and insignificant for alpha's below 0.014.
+**b)** An expert claims that the mean birthweight is bigger than 2800, verify this claim by using at-test.What is the outcome of the test if you take α = 0.1?  And other values of α?
+
+A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an α of 0.1. The claim is significant for all α's above 0.014 and insignificant for α's below 0.014.
 ```{r}
 t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)
 ```
 
-## c)
+**c)** In the R-output of the test from b), also a confidence interval is given, but why is it different from theconfidence interval found in a) and why is it one-sided?
+
+
 The confidence interval interval is different because the one-sample t-test returns a 95% confidence interval while a 90% confidence interval is conducted in 1b). The confidence interval is one sided because the critical area of the weight distribution  is compared to a mean where it is greater than 2800, but not both greater and less than 2800.
 
 
