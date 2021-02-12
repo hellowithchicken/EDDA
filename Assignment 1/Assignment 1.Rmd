@@ -1,28 +1,100 @@
 ---
-title: "Assignment 1"
-output: pdf_document
+title: "EDDA - Assignment 1"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi) 
 knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Exercise 5
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## a)
 
-```{r cars}
-summary(cars)
+Test whether the distributions of the chicken weights for meatmeal and sunflower groups are different
+by performing three tests: the two samples t-test (argue whether the data are paired or not), the
+Mann-Whitney test and the Kolmogorov-Smirnov test. Comment on your fndings.
+
+```{r}
+# filter for meatmeal
+
+meatmeal <- chickwts %>% 
+  filter(feed == "meatmeal") %>% 
+  select(weight)
+
+# filter for sunflower
+
+sunflower <- chickwts %>% 
+  filter(feed == "sunflower") %>% 
+  select(weight)
+
+# check for data normality
+
+qqnorm(meatmeal$weight)
+qqnorm(meatmeal$weight)
+
+# perform t-test, the data is not paired
+
+t.test(meatmeal, sunflower)
+
+# Mann-Whitney test
+
+wilcox.test(meatmeal$weight, sunflower$weight)
+
+# Kolmogorov-Smirnov test
+
+ks.test(meatmeal$weight, sunflower$weight)
+
 ```
 
-## Including Plots
+Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks not the same chick. From t-test we can see that the p-values <0.05, therefore the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05 therefore we can not conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can not conclude that the means are different.
 
-You can also embed plots, for example:
+## b)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Conduct a one-way ANOVA to determine whether the type of feed supplement has an effect on the
+weight of the chicks. Give the estimated chick weights for each of the six feed supplements. What is
+the best feed supplement?
+
+```{r}
+chickaov <- lm(weight~feed, data = chickwts)
+# performing one-way ANOVA
+anova(chickaov)
+#extracting more information
+summary_table <- summary(chickaov)
+summary_table$coefficients
+```
+From the results of one-way ANOVA we can see that the p-values is <0.05 therefore we can conclude that the means between all of the feed varieties are significantly different. 
+From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight. therefore it is the best.
+
+## c)
+
+Check the ANOVA model assumptions by using relevant diagnostic tools.
+
+```{r}
+# check for normality
+qqnorm(chickaov$residuals)
+# check if the variances are equal
+chickwts %>% 
+  group_by(feed) %>% 
+  summarise(variance = var(weight))
+```
+From qqplot assumption of normality holds. However the assumption of equal variances does not hold.
+
+## d)
+
+Does the Kruskal-Wallis test arrive at the same conclusion about the effect of feed supplement as the
+test in b)? Explain possible differences between conclusions of the Kruskal-Wallis and ANOVA tests.
+
+```{r}
+kruskal.test(weight~feed, data = chickwts)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+With Kruskal-Wallis test we arrive to the same conclusion as with ANOVA. 
+
