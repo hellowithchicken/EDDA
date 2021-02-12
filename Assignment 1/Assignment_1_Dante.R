@@ -31,24 +31,26 @@ n <- m <- 30
 mu <- 180
 nu <- 175
 sd <- 5
-B <- 1000
-
-p <- numeric(B)
-
 grid <- seq(175,185, by=0.25)
-G <- length(grid)
 
-fractions <- numeric(G)
-
-for (grid_nu in 1:G){
+power_function(grid,n,m,mu,sd) {
+  B <- 1000
   p <- numeric(B)
-  for (b in 1:B){
-    x <- rnorm(n,mu,sd)
-    y <- rnorm(m,grid[grid_nu],sd)
-    p[b] <- t.test(x,y, var.equal = TRUE)[[3]]
+  G <- length(grid)
+  fractions <- numeric(G)
+  for (grid_nu in 1:G){
+    p <- numeric(B)
+    for (b in 1:B){
+      x <- rnorm(n,mu,sd)
+      y <- rnorm(m,grid[grid_nu],sd)
+      p[b] <- t.test(x,y, var.equal = TRUE)[[3]]
+    }
+    fractions[grid_nu] <- mean(p<0.05)
   }
-  fractions[grid_nu] <- mean(p<0.05)
+  return(fractions)
 }
+
+fractions <- power_function(grid,n,m,mu,sd)
 plot(grid,fractions)
 
 # B
