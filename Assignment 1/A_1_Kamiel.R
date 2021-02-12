@@ -7,23 +7,23 @@ library(rstudioapi)
 library(rstatix)
 library(ggpubr)
 
-# Exercise 1
+##################################### Exercise 1 #####################################
+#setwd("C:/Users/KGulp/oneDrive/Documenten/Computational Science/Experimental design and data analysis/R_data")
 setwd(dirname(getActiveDocumentContext()$path))
 getwd()
-data<-read.table(file="data/birthweight.txt",header=TRUE)
+data=read.table(file="data/birthweight.txt",header=TRUE)
 
-# A
-bw <- data$birthweight
+bw = data$birthweight
 hist(bw)
 qqnorm(bw)
 boxplot(bw)
 shapiro.test(bw)
-m <- mean(bw)
-s <- sd(bw)
-n <- length(bw)
-error <- qnorm(0.95)*s/sqrt(n)
+m = mean(bw)
+s = sd(bw)
+n = length(bw)
+error = qnorm(0.95)*s/sqrt(n)
 error
-ci <- c(m-error, m+error)
+ci = c(m-error, m+error)
 ci
 
 ?t.test
@@ -32,12 +32,10 @@ t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)
 
 m_2800 = numeric(length(bw))
 
-# B
-t.test(bw,mu=2800, alternative = "greater", conf.level = 0.95)
-
-
-t.test(bw,mu=2800, alternative = "greater", conf.level = 0.99)
-
+for (i in 1:length(bw)){m_2800[i] = 2800}
+m_2800
+t.test(bw,m_2800, alternative = "greater", conf.level = 0.95)
+#################################### Exercise 2 #######################################
 
 ###################################2a############################################
 n <- 30
@@ -55,25 +53,6 @@ se <- seq(175,185,by=0.25)
 se
 power <- numeric(length(se))
 
-# C
-
-# Exercise 2 
-# A
-n <- 30
-m <- 30
-mu <- 180
-nu <- 175
-sd <- 5
-x <- rnorm(n,mu,sd)
-y <- rnorm(n,nu,sd)
-
-t.test(x, y)
-
-p <- numeric(1000)
-
-
-se <- seq(175,185,by=0.25)
-power <- numeric(length(se))
 
 
 for (n in  1:length(se)){
@@ -82,12 +61,6 @@ for (n in  1:length(se)){
     y<-rnorm(n,mu,sd) 
     x<-rnorm(m,se[n],sd)
     p[i] = t.test(x,y,var.equal=TRUE)[[3]]
-
-  for (i in 1:1000){
-    nu <- se[n]
-    x<-rnorm(n,mu,sd); y<-rnorm(m,nu,sd)
-    p[i] <- t.test(x,y,var.equal=TRUE)[[3]]
-
   }
   power[n] <- mean(p<0.05)
 }
@@ -108,22 +81,9 @@ sd = 5
 t.test(x, y)
 
 
-# B
-n <- 100
-m <- 100
-mu <- 180
-nu <- 175
-sd <- 5
-x <- rnorm(n,mu,sd)
-y <- rnorm(n,nu,sd)
 
-t.test(x, y)
-
-p <- numeric(1000)
-
-
-se <- seq(175,185,by=0.25)
-power <- numeric(length(se))
+se = seq(175,185,by=0.25)
+power = numeric(length(se))
 help(seq)
 
 
@@ -134,12 +94,8 @@ for (n in  1:length(se)){
     x=rnorm(n,mu,sd) 
     y=rnorm(m,nu,sd)
     p[i] = t.test(x,y,var.equal=TRUE)[[3]]
-    nu <- se[n]
-    x<-rnorm(n,mu,sd); y<-rnorm(m,nu,sd)
-    p[i] <- t.test(x,y,var.equal=TRUE)[[3]]
-
   }
-  power[n] <- mean(p<0.05)
+  power[n] = mean(p<0.05)
 }
 p
 
@@ -147,34 +103,33 @@ length(power)
 length(se)
 plot(se,power, main = "100 - 5")
 
-# C
+############################### 2c ################################
 par(mfrow=c(1,3))
-n <- 30
-m <- 30
-mu <- 180
-nu <- 175
-sd <- 15
-x <- rnorm(n,mu,sd)
-y <- rnorm(n,nu,sd)
+########################################## 2b ###############################
+n = 30
+m = 30
+mu = 180
+nu = 175
+sd = 15
+x = rnorm(n,mu,sd)
+y = rnorm(n,nu,sd)
 
 t.test(x, y)
 
-p <- numeric(1000)
+p = numeric(1000)
 
-se <- seq(175,185,by=0.25)
-power <- numeric(length(se))
+se = seq(175,185,by=0.25)
+power = numeric(length(se))
 
 
-# We  now  study  thep-value  and  thepower functionof  thet-test.   
-# The  power  function  gives,  for  everygiven set of parameters (n,m,??,??,sd), 
-# the probability that thet-test rejects the null hypothesis. 
+# We  now  study  thep-value  and  thepower functionof  thet-test.   The  power  function  gives,  for  everygiven set of parameters (n,m,??,??,sd), the probability that thet-test rejects the null hypothesis. 
 for (n in  1:length(se)){
   for (i in 1:1000){
-    nu <- se[n]
-    x<-rnorm(n,mu,sd); y<-rnorm(m,nu,sd)
-    p[i] <- t.test(x,y,var.equal=TRUE)[[3]]
+    nu = se[n]
+    x=rnorm(n,mu,sd); y=rnorm(m,nu,sd)
+    p[i] = t.test(x,y,var.equal=TRUE)[[3]]
   }
-  power[n] <- mean(p<0.05)
+  power[n] = mean(p<0.05)
 }
 p
 
@@ -182,16 +137,11 @@ length(power)
 length(se)
 plot(se,power, main = "30 - 15")
 
-# D
+######################## exercise 3 #############################################
 
 data=read.table(file="data/telephone.txt",header=TRUE)
-
-# Exercise 3
-# A
-data<-read.table(file="telephone.txt",header=TRUE)
-
 data
-bills<-data$Bills
+bills = data$Bills
 bills
 hist(bills)
 qqnorm(bills)
@@ -272,9 +222,14 @@ data=read.table(file="data/run.txt",header=TRUE)
 # 4a
 data
 
-first_run = data$before
-second_run = data$after
+lemo_data = data[which((data$drink == "lemo")),]
+energy_data = data[which((data$drink == "energy")),]
 
+first_run_l = lemo_data$before
+second_run_l = lemo_data$after
+
+first_run_e = energy_data$before
+second_run_e = energy_data$before
 plot(first_run, second_run)
 cor(first_run, second_run)
 
@@ -284,16 +239,54 @@ hist(second_run)
 shapiro.test(first_run)
 shapiro.test(second_run)
 
-t.test(first_run, second_run)
 
-time_diverence_lemo = c()
-time_diverence_energy = c()
+t.test(first_run, second_run, paired=TRUE)
 
-for (i in 1:(length(first_run)/2))
-  time_diverence_lemo = c(time_diverence_lemo, abs(first_run[i] - second_run[i]))
-  time_diverence_energy = c(time_diverence_energy, abs(first_run[i + (first_run)/2)] - second_run[i+ (first_run)/2)]))
+time_difference_lemo = c()
+time_difference_energy = c()
 
-  time_diverence = c(time_diverence, abs(first_run[i] - second_run[i]))
+lemo_data = data[which((data$drink == "lemo")),]
+energy_data = data[which((data$drink == "energy")),]
+lemo_data
+energy_data
 
+for (i in 1:length(lemo_data$before)){
+  time_difference_lemo = c(time_difference_lemo, (lemo_data$before[i] - lemo_data$after[i]))
+  time_difference_energy = c(time_difference_energy, (energy_data$before[i]) - energy_data$after[i])
+}
 length(time_diverence)
 length(data$before)
+
+time_difference_energy = abs(time_difference_energy)
+time_difference = abs(time_difference_lemo)
+
+shapiro.test(time_difference_energy)
+shapiro.test(time_difference_lemo)
+
+t.test(time_difference_energy, time_difference_lemo)
+par(mfrow=c(1,2))
+boxplot(time_difference_energy)
+boxplot(time_difference_lemo)
+
+################## exercise 5###############
+chickwts
+meat_meal = chickwts[which((chickwts$feed == "meatmeal")),]$weight
+sun_flower = chickwts[which((chickwts$feed == "sunflower")),]$weight
+
+hist(meat_meal)
+hist(sun_flower)
+
+shapiro.test(meat_meal)
+shapiro.test(sun_flower)
+
+t.test(meat_meal, sun_flower, alternative = "two.sided" )
+wilcox.test(meat_meal, sun_flower)
+ks.test(meat_meal, sun_flower)
+
+a = lm(weight ~ feed, data=chickwts)
+anova(a)
+summary(a)
+?lm
+attach(chickwts)
+kruskal.test(weight,feed)
+
