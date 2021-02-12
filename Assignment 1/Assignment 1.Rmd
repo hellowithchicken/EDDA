@@ -122,6 +122,7 @@ The more datapoints seems to have an influence on the narrowness of the plot. Fu
 ```{r}
 data<-read.table(file="data/telephone.txt",header=TRUE)
 data_tele <- data$Bills
+par(mfrow=c(1,3))
 hist(data_tele)
 qqnorm(data_tele)
 boxplot(data_tele)
@@ -150,7 +151,6 @@ for (x in X){
   pl;pr;p
   pvalues <- c(pvalues,p)
 }
-pvalues
 plot(X, pvalues)
 ```
 There exist a Exp function that fits the hypothesis
@@ -180,6 +180,7 @@ lines(x,exp(x),type="l",col="blue",lwd=2)
 max_index <- which.max(pvalues)
 
 opt_Lambda <- X[max_index]
+opt_Lambda
 ```
 The variable opt_Lambda is the optimal lambda value with the highest P-value.
 
