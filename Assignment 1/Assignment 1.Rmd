@@ -8,7 +8,7 @@ output:
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(rstudioapi) 
+library(rstudioapi)
 knitr::opts_chunk$set(echo = TRUE)
 setwd(dirname(getActiveDocumentContext()$path))
 ```
