@@ -41,7 +41,7 @@ m = mean(bw)
 s = sd(bw)
 n = length(bw)
 error = qnorm(0.95)*s/sqrt(n)
-error
+m
 ci = c(m-error, m+error)
 ci
 ```
@@ -171,7 +171,7 @@ Tstar975 <- quantile(Tstar, 0.975)
 T1
 c(2*T1-Tstar975, 2*T1-Tstar25)
 
-#hist(data_tele, prob=T, ylim=c(0,0.05))
+hist(data_tele, prob=T, ylim=c(0,0.05))
 x<-seq(0,max(data_tele),length=1000)
 lines(x,exp(x),type="l",col="blue",lwd=2)
 ```
