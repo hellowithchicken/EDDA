@@ -9,9 +9,13 @@ output:
 ```{r setup, include=FALSE}
 
 library(tidyverse)
-library(rstudioapi) 
+library(rstudioapi)
+library(pander)
+panderOptions('round', 3)
+panderOptions('keep.trailing.zeros', TRUE)
 
 knitr::opts_chunk$set(echo = TRUE)
+options(knitr.table.format = "latex")
 setwd(dirname(getActiveDocumentContext()$path))
 ```
 
@@ -273,7 +277,7 @@ sunflower <- chickwts %>%
 # check for data normality
 
 qqnorm(meatmeal$weight)
-qqnorm(meatmeal$weight)
+qqnorm(sunflower$weight)
 
 # perform t-test, the data is not paired
 
@@ -303,7 +307,7 @@ chickaov <- lm(weight~feed, data = chickwts)
 anova(chickaov)
 #extracting more information
 summary_table <- summary(chickaov)
-summary_table$coefficients
+knitr::kable(data.frame(summary_table$coefficients), "latex")
 ```
 From the results of one-way ANOVA we can see that the p-values is <0.05 therefore we can conclude that the means between all of the feed varieties are significantly different. 
 From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight. therefore it is the best.
