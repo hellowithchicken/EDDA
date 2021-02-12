@@ -18,6 +18,146 @@ options(knitr.table.format = "latex")
 setwd(dirname(getActiveDocumentContext()$path))
 ```
 
+
+# Exercise 2
+
+## a)
+
+```{r}
+n <- m <- 30
+mu <- 180
+nu <- 175
+sd <- 5
+grid <- seq(175,185, by=0.25)
+
+power_function<-function(grid,n,m,mu,sd) {
+  B <- 1000
+  p <- numeric(B)
+  G <- length(grid)
+  fractions <- numeric(G)
+  for (grid_nu in 1:G){
+    p <- numeric(B)
+    for (b in 1:B){
+      x <- rnorm(n,mu,sd)
+      y <- rnorm(m,grid[grid_nu],sd)
+      p[b] <- t.test(x,y, var.equal = TRUE)[[3]]
+    }
+    fractions[grid_nu] <- mean(p<0.05)
+  }
+  return(fractions)
+}
+
+fractions_A <- power_function(grid,n,m,mu,sd)
+
+```
+## b)
+
+```{r}
+n <- m <- 100
+mu <- 180
+sd <- 5
+
+fractions_B <- power_function(grid,n,m,mu,sd)
+```
+
+## c)
+
+```{r}
+n <- m <- 30
+mu <- 180
+sd <- 15
+
+fractions_C <- power_function(grid,n,m,mu,sd)
+par(mfrow=c(1,3))
+plot(grid,fractions_A)
+plot(grid,fractions_B)
+plot(grid,fractions_C)
+```
+
+## d)
+The more datapoints seems to have an influence on the narrowness of the plot. Furthermore, a bigger std gives a more wider distribution of fractions as presented in the plot of C.
+
+# Exercise 3
+
+## a)
+
+```{r}
+data<-read.table(file="data/telephone.txt",header=TRUE)
+data_tele <- data$Bills
+hist(data_tele)
+qqnorm(data_tele)
+boxplot(data_tele)
+```
+
+The data seems oddly distributed with two subpeaks, would have expected a more normally distributed set. Therefore perhaps a good idea if the manager arranges the prices better.
+
+## b)
+
+```{r}
+X <- seq(0.01, 0.1, 0.0005)
+pvalues <- c()
+t <- median(data_tele)
+for (x in X){
+  B <- 1000
+  tstar <- numeric(B)
+  n <- length(data_tele)
+  
+  for (i in 1:B){
+    xstar <- rexp(n,x)
+    tstar[i] <- median(xstar)
+  }
+  pl<-sum(tstar<t)/B
+  pr<-sum(tstar>t)/B
+  p<-2*min(pl,pr)
+  pl;pr;p
+  pvalues <- c(pvalues,p)
+}
+pvalues
+plot(X, pvalues)
+```
+There exist a Exp function that fits the hypothesis
+
+## c)
+```{r}
+B <- 1000
+T1 <- median(data_tele)
+Tstar <- numeric(B)
+for (i in 1:B){
+  Xstar <- sample(data_tele,replace=TRUE)
+  Tstar[i] <- median(Xstar)
+}
+Tstar25 <- quantile(Tstar,0.025)
+Tstar975 <- quantile(Tstar, 0.975)
+
+T1
+c(2*T1-Tstar975, 2*T1-Tstar25)
+
+hist(data_tele, prob=T, ylim=c(0,0.05))
+x<-seq(0,max(data_tele),length=1000)
+lines(x,exp(x),type="l",col="blue",lwd=2)
+```
+
+## d)
+```{r}
+max_index <- which.max(pvalues)
+
+opt_Lambda <- X[max_index]
+```
+The variable opt_Lambda is the optimal lambda value with the highest P-value.
+
+## e)
+```{r}
+bill_bigeq40 <- sum(data_tele>=40)
+bill_smal40 <- sum(data_tele<40)
+
+binom.test(bill_bigeq40, length(data_tele),p=0.5)
+binom.test(bill_smal40, length(data_tele),p=0.5)
+
+bill_less10 <- sum(data_tele < 10)
+bill_less10/length(data_tele)
+```
+
+
 # Exercise 4
 
 ## a)
