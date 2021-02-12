@@ -38,14 +38,14 @@ data <- data %>%
 lemo <- data %>% 
   filter(drink == "lemo")
 
-t.test(lemo$before, lemo$after)
+t.test(lemo$before, lemo$after, paired = TRUE)
 
 # filter for energy
 
 energy <- data %>% 
   filter(drink == "energy")
 
-t.test(energy$before, energy$after)
+t.test(energy$before, energy$after, paired = TRUE)
 ```
 
 For both energy and soft-drink groups there does not seem to be a significant difference in running times.
