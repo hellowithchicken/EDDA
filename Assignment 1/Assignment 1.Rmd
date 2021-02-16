@@ -14,14 +14,12 @@ library(rstudioapi)
 knitr::opts_chunk$set(echo = TRUE)
 options(knitr.table.format = "latex")
 setwd(dirname(getActiveDocumentContext()$path))
-# round numbers to 4 digits
-options(scipen = 1, digits = 4)
 ```
 
 # Exercise 1
-The data set birthweight.txt contains the birthweights of 188 newborn babies.  We are interested in finding the underlying (population) mean $\mu$ of birthweights.
+The data set birthweight.txt contains the birthweights of 188 newborn babies.  We are interested in finding the underlying (population) mean mu of birthweights.
 
-**a)** Check normality of the data.  Compute a point estimate for mu.  Derive, assuming normality (irrespective of your conclusion about normality od the data), a bounded 90% confidence interval for $\mu$.
+**a)** Check normality of the data.  Compute a point estimate for mu.  Derive, assuming normality (irrespective of your conclusion about normality od the data), a bounded 90% confidence interval for mu.
 
 
 To check normality for the data we use a qqplot, historgram, box plot and shapiro-wilks test. 
@@ -36,7 +34,7 @@ boxplot(bw)
 shapiro.test(bw)
 
 ```
-The graphical methods show that the data is normal. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of 0.8995, meaning that the H0 is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
+The graphical methods show that the data is normal. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of 0.8995, meaning that the H0 is not rejected and therefore the data is normal. Furthermore, a point estimate for mu is conducted along side a 90% confidence interval.
 
 ```{r}
 m = mean(bw)
@@ -49,9 +47,9 @@ ci
 ```
 
 
-**b)** An expert claims that the mean birthweight is bigger than 2800, verify this claim by using at-test.What is the outcome of the test if you take $\alpha$ = 0.1?  And other values of $\alpha$?
+**b)** An expert claims that the mean birthweight is bigger than 2800, verify this claim by using at-test.What is the outcome of the test if you take alpha = 0.1?  And other values of alpha?
 
-A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an $\alpha$ of 0.1. The claim is significant for all $\alpha$'s above 0.014 and insignificant for $\alpha$'s below 0.014.
+A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an alpha of 0.1. The claim is significant for all alpha's above 0.014 and insignificant for alpha's below 0.014.
 ```{r}
 t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)
 ```
@@ -63,9 +61,9 @@ The confidence interval interval is different because the one-sample t-test retu
 
 
 # Exercise 2
-We study the power function of the two-sample t-test (see Section 1.9 of Assignment 0). For n=m=30, $\mu$=180, $\nu$=175 and sd=5, generate 1000 samples x=rnorm(n,mu,sd) and y=rnorm(m,nu,sd), and record the 1000 p-values for testing H0: $\mu$=$\nu$. You can evaluate the power (at point $\nu$=175) of this t-test as fraction of p-values that are smaller than 0.05.
+We study the power function of the two-sample t-test (see Section 1.9 of Assignment 0). For n=m=30, mu=180, nu=175 and sd=5, generate 1000 samples x=rnorm(n,mu,sd) and y=rnorm(m,nu,sd), and record the 1000 p-values for testing H0: mu=nu. You can evaluate the power (at point nu=175) of this t-test as fraction of p-values that are smaller than 0.05.
 
-**a)** Set n=m=30, mu=180 and sd=5. Calculate now the power of the t-test for every value of $\nu$ in the grid seq(175,185,by=0.25). Plot the power as a function of $\nu$.
+**a)** Set n=m=30, mu=180 and sd=5. Calculate now the power of the t-test for every value of nu in the grid seq(175,185,by=0.25). Plot the power as a function of nu.
 
 ```{r}
 n <- m <- 30
@@ -94,7 +92,7 @@ power_function<-function(grid,n,m,mu,sd) {
 fractions_A <- power_function(grid,n,m,mu,sd)
 
 ```
-**b)** Set n=m=100, $\mu$=180 and sd=5. Repeat the preceding exercise. Add the plot to the preceding plot.
+**b)** Set n=m=100, mu=180 and sd=5. Repeat the preceding exercise. Add the plot to the preceding plot.
 
 ```{r}
 n <- m <- 100
@@ -104,7 +102,7 @@ sd <- 5
 fractions_B <- power_function(grid,n,m,mu,sd)
 ```
 
-**c)** Set n=m=30, $\mu$=180 and sd=15. Repeat the preceding exercise.
+**c)** Set n=m=30, mu=180 and sd=15. Repeat the preceding exercise.
 
 ```{r}
 n <- m <- 30
@@ -161,7 +159,7 @@ for (x in X){
 }
 plot(X, pvalues)
 ```
-There exist an Exp function that fits the hypothesis
+The figure above shows the p-values for different lambda values. There can be concluded that the data stems from a exponential distribution for the lambda valus 0.02 till 0.029.
 
 **c)** Construct a 95% bootstrap confidence interval for the population median of the sample.
 ```{r}
@@ -208,12 +206,10 @@ To study the effect of energy drink a sample of 24 high school pupils were rando
 
 ```{r}
 data <- read.table(file="data/run.txt",header=TRUE)
-cor.test(data$before, data$after)$p.value
-## disgnostics
-par(mfrow=c(1,2)); qqnorm(data$before); qqnorm(data$after)
+cor(data$before, data$after)
 ```
 
-To test whether the data is correlated we run a Person correlation test. From the resulting p-value above we can conclude that there is significant correlation between the running times before drink and after drink. Assumption of normality needed for the performed test was confirmed by a qqnorm plot.
+Run times before and after the drink seem to be positively correlated.
 
 **b)** Test separately, for both the softdrink and the energy drink conditions, whether there is a difference in speed in the two running tasks.
 
@@ -227,17 +223,17 @@ data <- data %>%
 lemo <- data %>% 
   filter(drink == "lemo")
 
-paste0("p-value for soft drink: ", round(t.test(lemo$before, lemo$after, paired = TRUE)$p.value, 4))
+t.test(lemo$before, lemo$after, paired = TRUE)
 
 # filter for energy
 
 energy <- data %>% 
   filter(drink == "energy")
 
-paste0("p-value for energy drink: ", round(t.test(energy$before, energy$after, paired = TRUE)$p.value, 4))
+t.test(energy$before, energy$after, paired = TRUE)
 ```
 
-Paired t-test was selected for this task as the experimental data was collected for the same individual after and before drink. For both energy and soft-drink groups there does not seem to be a significant difference in means of the running times.
+For both energy and soft-drink groups there does not seem to be a significant difference in running times.
 
 **c)** For each pupil compute the time difference between the two running tasks. Test whether these time differences are effected by the type of drink.
 
@@ -245,7 +241,7 @@ Paired t-test was selected for this task as the experimental data was collected 
 
 # perform t-test
 
-t.test(lemo$diff, energy$diff)$p.value
+t.test(lemo$diff, energy$diff)
 
 ```
 The p-value is > 0.05 therefore the means of the two populations are not significantly different.
@@ -279,19 +275,19 @@ qqnorm(sunflower$weight)
 
 # perform t-test, the data is not paired
 
-paste0("t-test p-value: ", round(t.test(meatmeal, sunflower)$p.value, 4))
+t.test(meatmeal, sunflower)
 
 # Mann-Whitney test
 
-paste0("Mann-Whitney test p-value: ", round(wilcox.test(meatmeal$weight, sunflower$weight)$p.value, 4))
+wilcox.test(meatmeal$weight, sunflower$weight)
 
 # Kolmogorov-Smirnov test
 
-paste0("Kolmogorov-Smirnov test: ", round(ks.test(meatmeal$weight, sunflower$weight)$p.value, 4))
+ks.test(meatmeal$weight, sunflower$weight)
 
 ```
 
-Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks, therefore the data is independent. From t-test we can see that the p-values <0.05, this would conclude that the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05, therefore we cannot conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can see that p-value is >0.05, therefore we cannot conclude that the means are different. From qqnorm plots we can observe that the sunflower feed data is not normal, therefore t-test here is inappropriate.
+Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks not the same chick. From t-test we can see that the p-values <0.05, therefore the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05 therefore we can not conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can not conclude that the means are different.
 
 **b)**Conduct a one-way ANOVA to determine whether the type of feed supplement has an effect on the weight of the chicks. Give the estimated chick weights for each of the six feed supplements. What is the best feed supplement?
 
@@ -300,12 +296,11 @@ chickaov <- lm(weight~feed, data = chickwts)
 # performing one-way ANOVA
 anova(chickaov)
 #extracting more information
-summary_table <- as_tibble(summary(chickaov)$coefficients) %>% 
-  rename("p-value" = `Pr(>|t|)`)
-knitr::kable(summary_table, "latex")
+summary_table <- summary(chickaov)
+knitr::kable(data.frame(summary_table$coefficients), "latex")
 ```
-From the results of one-way ANOVA we can see that the p-values is < 0.05, therefore we can conclude that at least one of the means between different feed varieties are significantly different. 
-From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight, however by looking at the p-values we can see that it is not significantly different from base feed variety, therefore we cannot conclude which one is the best.
+From the results of one-way ANOVA we can see that the p-values is <0.05 therefore we can conclude that the means between all of the feed varieties are significantly different. 
+From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight. therefore it is the best.
 
 **c)**Check the ANOVA model assumptions by using relevant diagnostic tools.
 
@@ -317,13 +312,13 @@ chickwts %>%
   group_by(feed) %>% 
   summarise(variance = var(weight))
 ```
-
 From qqplot assumption of normality holds. However the assumption of equal variances does not hold.
 
 **d)** Does the Kruskal-Wallis test arrive at the same conclusion about the effect of feed supplement as the test in b)? Explain possible differences between conclusions of the Kruskal-Wallis and ANOVA tests.
 
 ```{r}
-kruskal.test(weight~feed, data = chickwts)$p.value
+kruskal.test(weight~feed, data = chickwts)
 ```
 
-With Kruskal-Wallis test we arrive to the same conclusion as with ANOVA. This is an expected outcome as ANOVA works with normal data (assumption verified in c) ) and Kruskal-Wallis test works with any type of data.
+With Kruskal-Wallis test we arrive to the same conclusion as with ANOVA. 
+
