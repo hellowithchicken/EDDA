@@ -141,7 +141,7 @@ The data seems oddly distributed with two subpeaks, would have expected a more n
 **b)** By using a bootstrap test with the test statistic T = median(X_1,....,X_200), test whether the data telephone.txt stems from the exponential distribution Exp(lambda) with some lambda from [0.01, 0.1].
 
 ```{r}
-X <- seq(0.01, 0.1, 0.0005)
+lambda <- seq(0.01, 0.1, 0.0005)
 pvalues <- c()
 t <- median(data_tele)
 for (x in X){
@@ -159,7 +159,10 @@ for (x in X){
   pl;pr;p
   pvalues <- c(pvalues,p)
 }
-plot(X, pvalues)
+plot(lambda, pvalues)
+
+best_p <- which(pvalues > 0.05)
+lambda[best_p]
 ```
 There exist an Exp function that fits the hypothesis
 
