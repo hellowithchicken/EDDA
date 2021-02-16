@@ -1,5 +1,6 @@
 ---
-title: "EDDA - Assignment 1"
+title: "EDDA - Assignment 1 - Group 77"
+subtitle: "Dante de Lang, Ignas Krikštaponis and Kamiel Gülpen"
 output:
   pdf_document: default
   html_document:
@@ -119,7 +120,7 @@ plot(grid,fractions_C)
 
 **d)** Explain your findings.
 
-The more datapoints seems to have an influence on the narrowness of the plot. Furthermore, a bigger std gives a more wider distribution of fractions as presented in the plot of C.
+More datapoints seems to have an influence on the narrowness of the plot. Furthermore, a bigger standard deviations gives a more wider distribution of fractions as presented in the plot of C with lower fractions. This can be explained by the fact that a higher standard deviations gives a higher uncertainty which results in a lower amount of fractions with a p-value below 0.05.
 
 # Exercise 3
 A telecommunication company has entered the market for mobile phones in a new country. The company's marketing manager conducts a survey of 200 new subscribers for mobile phones. The results of the survey are in the data set telephone.txt, which contains the first month bills X_1,...,X_200, in euros.
@@ -177,9 +178,6 @@ Tstar975 <- quantile(Tstar, 0.975)
 T1
 c(2*T1-Tstar975, 2*T1-Tstar25)
 
-hist(data_tele, prob=T, ylim=c(0,0.05))
-x<-seq(0,max(data_tele),length=1000)
-lines(x,exp(x),type="l",col="blue",lwd=2)
 ```
 
 **d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings.
