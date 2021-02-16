@@ -1,5 +1,6 @@
 ---
-title: "EDDA - Assignment 1"
+title: "EDDA - Assignment 1 - Group 77"
+subtitle: "Dante de Lang, Ignas Krikštaponis and Kamiel Gülpen"
 output:
   pdf_document: default
   html_document:
@@ -9,9 +10,6 @@ output:
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(rstudioapi)
-library(pander)
-panderOptions('round', 3)
-panderOptions('keep.trailing.zeros', TRUE)
 
 knitr::opts_chunk$set(echo = TRUE)
 options(knitr.table.format = "latex")
@@ -19,9 +17,9 @@ setwd(dirname(getActiveDocumentContext()$path))
 ```
 
 # Exercise 1
-The data set birthweight.txt contains the birthweights of 188 newborn babies.  We are interested in finding the underlying (population) mean μ of birthweights.
+The data set birthweight.txt contains the birthweights of 188 newborn babies.  We are interested in finding the underlying (population) mean mu of birthweights.
 
-**a)** Check normality of the data.  Compute a point estimate for μ.  Derive, assuming normality (irrespective of your conclusion about normality od the data), a bounded 90% confidence interval for μ.
+**a)** Check normality of the data.  Compute a point estimate for mu.  Derive, assuming normality (irrespective of your conclusion about normality od the data), a bounded 90% confidence interval for mu.
 
 
 To check normality for the data we use a qqplot, historgram, box plot and shapiro-wilks test. 
@@ -49,9 +47,9 @@ ci
 ```
 
 
-**b)** An expert claims that the mean birthweight is bigger than 2800, verify this claim by using at-test.What is the outcome of the test if you take α = 0.1?  And other values of α?
+**b)** An expert claims that the mean birthweight is bigger than 2800, verify this claim by using at-test.What is the outcome of the test if you take alpha = 0.1?  And other values of alpha?
 
-A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an α of 0.1. The claim is significant for all α's above 0.014 and insignificant for α's below 0.014.
+A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an alpha of 0.1. The claim is significant for all alpha's above 0.014 and insignificant for alpha's below 0.014.
 ```{r}
 t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)
 ```
@@ -63,8 +61,9 @@ The confidence interval interval is different because the one-sample t-test retu
 
 
 # Exercise 2
+We study the power function of the two-sample t-test (see Section 1.9 of Assignment 0). For n=m=30, mu=180, nu=175 and sd=5, generate 1000 samples x=rnorm(n,mu,sd) and y=rnorm(m,nu,sd), and record the 1000 p-values for testing H0: mu=nu. You can evaluate the power (at point nu=175) of this t-test as fraction of p-values that are smaller than 0.05.
 
-## a)
+**a)** Set n=m=30, mu=180 and sd=5. Calculate now the power of the t-test for every value of nu in the grid seq(175,185,by=0.25). Plot the power as a function of nu.
 
 ```{r}
 n <- m <- 30
@@ -93,7 +92,7 @@ power_function<-function(grid,n,m,mu,sd) {
 fractions_A <- power_function(grid,n,m,mu,sd)
 
 ```
-## b)
+**b)** Set n=m=100, mu=180 and sd=5. Repeat the preceding exercise. Add the plot to the preceding plot.
 
 ```{r}
 n <- m <- 100
@@ -103,7 +102,7 @@ sd <- 5
 fractions_B <- power_function(grid,n,m,mu,sd)
 ```
 
-## c)
+**c)** Set n=m=30, mu=180 and sd=15. Repeat the preceding exercise.
 
 ```{r}
 n <- m <- 30
@@ -117,12 +116,14 @@ plot(grid,fractions_B)
 plot(grid,fractions_C)
 ```
 
-## d)
-The more datapoints seems to have an influence on the narrowness of the plot. Furthermore, a bigger std gives a more wider distribution of fractions as presented in the plot of C.
+**d)** Explain your findings.
+
+More datapoints seems to have an influence on the narrowness of the plot. Furthermore, a bigger standard deviations gives a more wider distribution of fractions as presented in the plot of C with lower fractions. This can be explained by the fact that a higher standard deviations gives a higher uncertainty which results in a lower amount of fractions with a p-value below 0.05.
 
 # Exercise 3
+A telecommunication company has entered the market for mobile phones in a new country. The company's marketing manager conducts a survey of 200 new subscribers for mobile phones. The results of the survey are in the data set telephone.txt, which contains the first month bills X_1,...,X_200, in euros.
 
-## a)
+**a)** Make an appropriate plot of this data set. What marketing advice(s) would you give to the marketing manager? Are there any inconsistencies in the data? If so, try to fix these.
 
 ```{r}
 data<-read.table(file="data/telephone.txt",header=TRUE)
@@ -135,7 +136,7 @@ boxplot(data_tele)
 
 The data seems oddly distributed with two subpeaks, would have expected a more normally distributed set. Therefore perhaps a good idea if the manager arranges the prices better.
 
-## b)
+**b)** By using a bootstrap test with the test statistic T = median(X_1,....,X_200), test whether the data telephone.txt stems from the exponential distribution Exp(lambda) with some lambda from [0.01, 0.1].
 
 ```{r}
 X <- seq(0.01, 0.1, 0.0005)
@@ -156,12 +157,11 @@ for (x in X){
   pl;pr;p
   pvalues <- c(pvalues,p)
 }
-#pvalues
 plot(X, pvalues)
 ```
 There exist an Exp function that fits the hypothesis
 
-## c)
+**c)** Construct a 95% bootstrap confidence interval for the population median of the sample.
 ```{r}
 B <- 1000
 T1 <- median(data_tele)
@@ -176,11 +176,9 @@ Tstar975 <- quantile(Tstar, 0.975)
 T1
 c(2*T1-Tstar975, 2*T1-Tstar25)
 
-
-
 ```
 
-## d)
+**d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings.
 ```{r}
 max_index <- which.max(pvalues)
 
@@ -188,7 +186,7 @@ opt_Lambda <- X[max_index]
 ```
 The variable opt_Lambda is the optimal lambda value with the highest P-value.
 
-## e)
+**e)** Using an appropriate test, test the null hypothesis that the median bill is bigger or equal to 40 euro against the alternative that the median bill is smaller than 40 euro. Next, design and perform a test to check whether the fraction of the bills less than 10 euro is less than 25%.
 ```{r}
 bill_bigeq40 <- sum(data_tele>=40)
 bill_smal40 <- sum(data_tele<40)
@@ -202,10 +200,9 @@ bill_less10/length(data_tele)
 
 
 # Exercise 4
+To study the effect of energy drink a sample of 24 high school pupils were randomized to drinking either a softdrink or an energy drink after running for 60 meters. After half an hour they were asked to run again. For both sprints they were asked to sprint as fast they could, and the sprinting time was measured. The data is given in the file run.txt. [Courtesy class 5E, Stedelijk Gymnasium Leiden, 2010.]
 
-## a)
-
-Disregarding the type of drink, test whether the run times before drink and after are correlated.
+**a)** Disregarding the type of drink, test whether the run times before drink and after are correlated.
 
 ```{r}
 data <- read.table(file="data/run.txt",header=TRUE)
@@ -214,7 +211,7 @@ cor(data$before, data$after)
 
 Run times before and after the drink seem to be positively correlated.
 
-## b)
+**b)** Test separately, for both the softdrink and the energy drink conditions, whether there is a difference in speed in the two running tasks.
 
 ```{r}
 # calculate differences
@@ -238,10 +235,7 @@ t.test(energy$before, energy$after, paired = TRUE)
 
 For both energy and soft-drink groups there does not seem to be a significant difference in running times.
 
-## c)
-
-For each pupil compute the time difference between the two running tasks. Test whether these time
-differences are effected by the type of drink.
+**c)** For each pupil compute the time difference between the two running tasks. Test whether these time differences are effected by the type of drink.
 
 ```{r}
 
@@ -252,19 +246,13 @@ t.test(lemo$diff, energy$diff)
 ```
 The p-value is > 0.05 therefore the means of the two populations are not significantly different.
 
-## d)
+**d)** Can you think of a plausible objection to the design of the experiment in b) if the main aim was to test whether drinking the energy drink speeds up the running? Is there a similar objection to the design of the experiment in c)? Comment on all your findings in this exercise.
 
-Can you think of a plausible objection to the design of the experiment in b) if the main aim was to test
-whether drinking the energy drink speeds up the running? Is there a similar objection to the design
-of the experiment in c)? Comment on all your fndings in this exercise.
+In both experiments the participants were asked to run on the same day. This could strongly influence the outcomes in data. Therefore, the setup was certainly not ideal to check the influence of both drinks. 
 
 # Exercise 5
 
-## a)
-
-Test whether the distributions of the chicken weights for meatmeal and sunflower groups are different
-by performing three tests: the two samples t-test (argue whether the data are paired or not), the
-Mann-Whitney test and the Kolmogorov-Smirnov test. Comment on your fndings.
+**a)** Test whether the distributions of the chicken weights for meatmeal and sunflower groups are different by performing three tests: the two samples t-test (argue whether the data are paired or not), the Mann-Whitney test and the Kolmogorov-Smirnov test. Comment on your findings.
 
 ```{r}
 # filter for meatmeal
@@ -281,6 +269,7 @@ sunflower <- chickwts %>%
 
 # check for data normality
 
+par(mfrow=c(1,2))
 qqnorm(meatmeal$weight)
 qqnorm(sunflower$weight)
 
@@ -300,11 +289,7 @@ ks.test(meatmeal$weight, sunflower$weight)
 
 Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks not the same chick. From t-test we can see that the p-values <0.05, therefore the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05 therefore we can not conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can not conclude that the means are different.
 
-## b)
-
-Conduct a one-way ANOVA to determine whether the type of feed supplement has an effect on the
-weight of the chicks. Give the estimated chick weights for each of the six feed supplements. What is
-the best feed supplement?
+**b)**Conduct a one-way ANOVA to determine whether the type of feed supplement has an effect on the weight of the chicks. Give the estimated chick weights for each of the six feed supplements. What is the best feed supplement?
 
 ```{r}
 chickaov <- lm(weight~feed, data = chickwts)
@@ -317,9 +302,7 @@ knitr::kable(data.frame(summary_table$coefficients), "latex")
 From the results of one-way ANOVA we can see that the p-values is <0.05 therefore we can conclude that the means between all of the feed varieties are significantly different. 
 From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight. therefore it is the best.
 
-## c)
-
-Check the ANOVA model assumptions by using relevant diagnostic tools.
+**c)**Check the ANOVA model assumptions by using relevant diagnostic tools.
 
 ```{r}
 # check for normality
@@ -331,10 +314,7 @@ chickwts %>%
 ```
 From qqplot assumption of normality holds. However the assumption of equal variances does not hold.
 
-## d)
-
-Does the Kruskal-Wallis test arrive at the same conclusion about the effect of feed supplement as the
-test in b)? Explain possible differences between conclusions of the Kruskal-Wallis and ANOVA tests.
+**d)** Does the Kruskal-Wallis test arrive at the same conclusion about the effect of feed supplement as the test in b)? Explain possible differences between conclusions of the Kruskal-Wallis and ANOVA tests.
 
 ```{r}
 kruskal.test(weight~feed, data = chickwts)
