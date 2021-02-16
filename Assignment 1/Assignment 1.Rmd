@@ -129,14 +129,22 @@ A telecommunication company has entered the market for mobile phones in a new co
 
 ```{r}
 data<-read.table(file="data/telephone.txt",header=TRUE)
+
+# remove zeros
+data <- data %>% 
+  filter(Bills > 0)
+
 data_tele <- data$Bills
 par(mfrow=c(1,3))
 hist(data_tele)
 qqnorm(data_tele)
 boxplot(data_tele)
+
 ```
 
-The data seems oddly distributed with two subpeaks, would have expected a more normally distributed set. Therefore perhaps a good idea if the manager arranges the prices better.
+From the survey it seems that there are two distinct peaks,therefore it would be good to run two separate marketing campaigns: a "premium" service campaign for customers who are willing to spend more and a campaign aimed at savers, usually people who use pre-paid services, - establishing a separate "cheaper" brand would be a good strategy here.
+
+The survey data also encompassed people who did not have any spendings on the phone bills, therefore they were removed from the analysis.
 
 **b)** By using a bootstrap test with the test statistic T = median(X_1,....,X_200), test whether the data telephone.txt stems from the exponential distribution Exp(lambda) with some lambda from [0.01, 0.1].
 
