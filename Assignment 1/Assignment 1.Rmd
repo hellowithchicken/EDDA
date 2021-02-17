@@ -14,6 +14,8 @@ library(rstudioapi)
 knitr::opts_chunk$set(echo = TRUE)
 options(knitr.table.format = "latex")
 setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 4 digits
+options(scipen = 1, digits = 4)
 ```
 
 # Exercise 1
@@ -229,10 +231,12 @@ To study the effect of energy drink a sample of 24 high school pupils were rando
 
 ```{r}
 data <- read.table(file="data/run.txt",header=TRUE)
-cor(data$before, data$after)
+cor.test(data$before, data$after)$p.value
+## disgnostics
+par(mfrow=c(1,2)); qqnorm(data$before); qqnorm(data$after)
 ```
 
-Run times before and after the drink seem to be positively correlated.
+To test whether the data is correlated we run a Person correlation test. From the resulting p-value above we can conclude that there is significant correlation between the running times before drink and after drink. Assumption of normality needed for the performed test was confirmed by a qqnorm plot.
 
 **b)** Test separately, for both the softdrink and the energy drink conditions, whether there is a difference in speed in the two running tasks.
 
@@ -240,32 +244,23 @@ Run times before and after the drink seem to be positively correlated.
 # calculate differences
 data <- data %>% 
   mutate(diff = before - after)
-
 # filter for lemo
-
 lemo <- data %>% 
   filter(drink == "lemo")
-
-t.test(lemo$before, lemo$after, paired = TRUE)
-
+paste0("p-value for soft drink: ", round(t.test(lemo$before, lemo$after, paired = TRUE)$p.value, 4))
 # filter for energy
-
 energy <- data %>% 
   filter(drink == "energy")
-
-t.test(energy$before, energy$after, paired = TRUE)
+paste0("p-value for energy drink: ", round(t.test(energy$before, energy$after, paired = TRUE)$p.value, 4))
 ```
 
-For both energy and soft-drink groups there does not seem to be a significant difference in running times.
+Paired t-test was selected for this task as the experimental data was collected for the same individual after and before drink. For both energy and soft-drink groups there does not seem to be a significant difference in means of the running times.
 
 **c)** For each pupil compute the time difference between the two running tasks. Test whether these time differences are effected by the type of drink.
 
 ```{r}
-
 # perform t-test
-
-t.test(lemo$diff, energy$diff)
-
+t.test(lemo$diff, energy$diff)$p.value
 ```
 The p-value is > 0.05 therefore the means of the two populations are not significantly different.
 
@@ -279,38 +274,26 @@ In both experiments the participants were asked to run on the same day. This cou
 
 ```{r}
 # filter for meatmeal
-
 meatmeal <- chickwts %>% 
   filter(feed == "meatmeal") %>% 
   select(weight)
-
 # filter for sunflower
-
 sunflower <- chickwts %>% 
   filter(feed == "sunflower") %>% 
   select(weight)
-
 # check for data normality
-
 par(mfrow=c(1,2))
 qqnorm(meatmeal$weight)
 qqnorm(sunflower$weight)
-
 # perform t-test, the data is not paired
-
-t.test(meatmeal, sunflower)
-
+paste0("t-test p-value: ", round(t.test(meatmeal, sunflower)$p.value, 4))
 # Mann-Whitney test
-
-wilcox.test(meatmeal$weight, sunflower$weight)
-
+paste0("Mann-Whitney test p-value: ", round(wilcox.test(meatmeal$weight, sunflower$weight)$p.value, 4))
 # Kolmogorov-Smirnov test
-
-ks.test(meatmeal$weight, sunflower$weight)
-
+paste0("Kolmogorov-Smirnov test: ", round(ks.test(meatmeal$weight, sunflower$weight)$p.value, 4))
 ```
 
-Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks not the same chick. From t-test we can see that the p-values <0.05, therefore the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05 therefore we can not conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can not conclude that the means are different.
+Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks, therefore the data is independent. From t-test we can see that the p-values <0.05, this would conclude that the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05, therefore we cannot conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can see that p-value is >0.05, therefore we cannot conclude that the means are different. From qqnorm plots we can observe that the sunflower feed data is not normal, therefore t-test here is inappropriate.
 
 **b)**Conduct a one-way ANOVA to determine whether the type of feed supplement has an effect on the weight of the chicks. Give the estimated chick weights for each of the six feed supplements. What is the best feed supplement?
 
@@ -319,11 +302,12 @@ chickaov <- lm(weight~feed, data = chickwts)
 # performing one-way ANOVA
 anova(chickaov)
 #extracting more information
-summary_table <- summary(chickaov)
-knitr::kable(data.frame(summary_table$coefficients), "latex")
+summary_table <- as_tibble(summary(chickaov)$coefficients) %>% 
+  rename("p-value" = `Pr(>|t|)`)
+knitr::kable(summary_table, "latex")
 ```
-From the results of one-way ANOVA we can see that the p-values is <0.05 therefore we can conclude that the means between all of the feed varieties are significantly different. 
-From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight. therefore it is the best.
+From the results of one-way ANOVA we can see that the p-values is < 0.05, therefore we can conclude that at least one of the means between different feed varieties are significantly different. 
+From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight, however by looking at the p-values we can see that it is not significantly different from base feed variety, therefore we cannot conclude which one is the best.
 
 **c)**Check the ANOVA model assumptions by using relevant diagnostic tools.
 
@@ -335,13 +319,13 @@ chickwts %>%
   group_by(feed) %>% 
   summarise(variance = var(weight))
 ```
+
 From qqplot assumption of normality holds. However the assumption of equal variances does not hold.
 
 **d)** Does the Kruskal-Wallis test arrive at the same conclusion about the effect of feed supplement as the test in b)? Explain possible differences between conclusions of the Kruskal-Wallis and ANOVA tests.
 
 ```{r}
-kruskal.test(weight~feed, data = chickwts)
+kruskal.test(weight~feed, data = chickwts)$p.value
 ```
 
-With Kruskal-Wallis test we arrive to the same conclusion as with ANOVA. 
-
+With Kruskal-Wallis test we arrive to the same conclusion as with ANOVA. This is an expected outcome as ANOVA works with normal data (assumption verified in c) ) and Kruskal-Wallis test works with any type of data.
