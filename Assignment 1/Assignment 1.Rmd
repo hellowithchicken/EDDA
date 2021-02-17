@@ -147,10 +147,10 @@ The survey data also encompassed people who did not have any spendings on the ph
 **b)** By using a bootstrap test with the test statistic T = median(X_1,....,X_200), test whether the data telephone.txt stems from the exponential distribution Exp(lambda) with some lambda from [0.01, 0.1].
 
 ```{r}
-X <- seq(0.01, 0.1, 0.0005)
+lambda <- seq(0.01, 0.1, 0.0005)
 pvalues <- c()
 t <- median(data_tele)
-for (x in X){
+for (x in lambda){
   B <- 1000
   tstar <- numeric(B)
   n <- length(data_tele)
@@ -165,7 +165,10 @@ for (x in X){
   pl;pr;p
   pvalues <- c(pvalues,p)
 }
-plot(X, pvalues)
+plot(lambda, pvalues)
+
+best_p <- which(pvalues > 0.05)
+lambda[best_p]
 ```
 The figure above shows the p-values for different lambda values. There can be concluded that the data stems from a exponential distribution for the lambda values 0.02 till 0.029.
 
@@ -202,9 +205,8 @@ theoretical_median = log(2)/opt_Lambda
 round(theoretical_median,3)
 error = qnorm(0.975)*(theoretical_median/sqrt(length(data_tele)))
 c(round(theoretical_median - error, 3), round(theoretical_median + error,3))
-
-
 ```
+
  The results show a interval between 24.796 and 32.967 which is a narrow confidence interval. It also shows a different confidence interval than the bootstrap confidence interval which can be explained because of the random nature of the bootstrap method. 
 
 **e)** Using an appropriate test, test the null hypothesis that the median bill is bigger or equal to 40 euro against the alternative that the median bill is smaller than 40 euro. Next, design and perform a test to check whether the fraction of the bills less than 10 euro is less than 25%.
