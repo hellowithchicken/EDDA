@@ -185,7 +185,9 @@ T1
 c(2*T1-Tstar975, 2*T1-Tstar25)
 
 ```
-The 95% bootstrap confidence interval of the median is [16.43, 36,576], with 28.905 a s median.
+The 95% bootstrap confidence interval of the median is [16.43, 36,576], with 28.905 as median.
+
+
 **d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings.
  
 ```{r}
