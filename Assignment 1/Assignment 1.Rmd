@@ -188,22 +188,24 @@ c(2*T1-Tstar975, 2*T1-Tstar25)
 The 95% bootstrap confidence interval of the median is [16.43, 36,576], with 28.905 as median.
 
 
-**d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings.
+**d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings. 
+
+The variable opt_Lambda is the lambda value for witch the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed. This can be computed in the following way: $\frac{ln(2)}{\lambda}$. With this median the confidence interval can be computed.
  
 ```{r}
 max_index <- which.max(pvalues)
 
 opt_Lambda <- X[max_index]
+round(opt_Lambda, 3)
 
-theoretical_mean = 1/opt_Lambda
 theoretical_median = log(2)/opt_Lambda
-theoretical_var = ((1/opt_Lambda)^2 )/length(data_tele)
+round(theoretical_median,3)
 error = qnorm(0.975)*(theoretical_median/sqrt(length(data_tele)))
-ci = c(theoretical_median - error, theoretical_median + error)
-ci
+c(round(theoretical_median - error, 3), round(theoretical_median + error,3))
+
 
 ```
-The variable opt_Lambda is the optimal lambda value with the highest P-value.
+ The results show a interval between 24.796 and 32.967 which is a narrow confidence interval. It also shows a different confidence interval than the bootstrap confidence interval which can be explained because of the random nature of the bootstrap method. 
 
 **e)** Using an appropriate test, test the null hypothesis that the median bill is bigger or equal to 40 euro against the alternative that the median bill is smaller than 40 euro. Next, design and perform a test to check whether the fraction of the bills less than 10 euro is less than 25%.
 ```{r}
