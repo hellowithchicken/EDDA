@@ -150,7 +150,7 @@ The survey data also encompassed people who did not have any spendings on the ph
 lambda <- seq(0.01, 0.1, 0.0005)
 pvalues <- c()
 t <- median(data_tele)
-for (x in X){
+for (x in lambda){
   B <- 1000
   tstar <- numeric(B)
   n <- length(data_tele)
@@ -193,7 +193,7 @@ c(2*T1-Tstar975, 2*T1-Tstar25)
 ```{r}
 max_index <- which.max(pvalues)
 
-opt_Lambda <- X[max_index]
+opt_Lambda <- lambda[max_index]
 ```
 The variable opt_Lambda is the optimal lambda value with the highest P-value.
 
