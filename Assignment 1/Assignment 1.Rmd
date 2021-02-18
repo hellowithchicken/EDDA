@@ -96,9 +96,7 @@ Plots are shown further below.
 **b)** Set n=m=100, mu=180 and sd=5. Repeat the preceding exercise. Add the plot to the preceding plot.
 
 ```{r}
-n <- m <- 100
-mu <- 180
-sd <- 5
+n <- m <- 100; mu <- 180; sd <- 5
 
 fractions_B <- power_function(grid,n,m,mu,sd)
 ```
@@ -144,7 +142,7 @@ From the survey it seems that there are two distinct peaks,therefore it would be
 
 The survey data also encompassed people who did not have any spendings on the phone bills, therefore they were removed from the analysis.
 
-**b)** By using a bootstrap test with the test statistic T = median(X_1,....,X_200), test whether the data telephone.txt stems from the exponential distribution Exp(lambda) with some lambda from [0.01, 0.1].
+**b)** By using a bootstrap test with the test statistic T = median($X_1,....,X_200$), test whether the data telephone.txt stems from the exponential distribution Exp($\lambda$) with some lambda from [0.01, 0.1].
 
 ```{r}
 lambda <- seq(0.01, 0.1, 0.0005)
@@ -191,7 +189,7 @@ c(2*T1-Tstar975, 2*T1-Tstar25)
 The 95% bootstrap confidence interval of the median can be observed above. The confidence interval of the bootstrap method changes each time it is executed because of the random nature of the method.
 
 
-**d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings. 
+**d)** Assuming $X_1,....,X_n ~ Exp(\lambda)$ and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings. 
 
 The variable opt_Lambda is the lambda value for witch the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed, which can be found in the following way: $\frac{ln(2)}{\lambda}$. The confidence interval of the median can be computed with the found theoretical median.
  
@@ -208,8 +206,8 @@ error = qnorm(0.975)*(theoretical_median/sqrt(length(data_tele)))
 c(round(theoretical_median - error, 3), round(theoretical_median + error,3))
 ```
 
- The results show a 95% confidence interval between 24.80 and 32.97 which is a narrow confidence interval. It also shows a different confidence interval than the bootstrap confidence interval which can be explained because of the random nature of the bootstrap method. 
-
+ The results show a 95% confidence interval between 24.80 and 32.97 which is a narrow confidence interval. It also shows a different confidence interval than the bootstrap confidence interval which can be explained because of the random nature of the bootstrap.
+ 
 **e)** Using an appropriate test, test the null hypothesis that the median bill is bigger or equal to 40 euro against the alternative that the median bill is smaller than 40 euro. Next, design and perform a test to check whether the fraction of the bills less than 10 euro is less than 25%.
 
 ```{r}
