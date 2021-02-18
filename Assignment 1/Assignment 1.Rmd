@@ -12,10 +12,9 @@ library(tidyverse)
 library(rstudioapi)
 
 knitr::opts_chunk$set(echo = TRUE)
-options(knitr.table.format = "latex")
 setwd(dirname(getActiveDocumentContext()$path))
-# round numbers to 4 digits
-options(scipen = 1, digits = 4)
+# round numbers to 3 digits
+options(digits = 3)
 ```
 
 # Exercise 1
@@ -319,7 +318,7 @@ table %>%
   ), Estimate = case_when(
     Type != "feedcasein" ~ as.numeric(table$Estimate[1]) + Estimate,
     TRUE ~ Estimate
-  )) %>%  mutate_if(is.numeric, funs(as.character(signif(., 4)))) %>%
+  )) %>%  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>%
     knitr::kable(.)
 ```
 From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight, however by looking at the p-values we can see that it is not significantly different from "casein" feed variety, therefore we cannot conclude which one of these two is the best.
