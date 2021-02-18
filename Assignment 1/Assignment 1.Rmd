@@ -36,7 +36,7 @@ boxplot(bw)
 shapiro.test(bw)$p.value
 
 ```
-The graphical methods show that the data is normal. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of `shapiro.test(bw)$p.value`, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
+The graphical methods show that the data is normal, due to the bell shaped histogram and straight diagonal QQ-plot. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of `shapiro.test(bw)$p.value`, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
 
 ```{r}
 m = mean(bw)
@@ -191,7 +191,7 @@ The 95% bootstrap confidence interval of the median can be observed above. The c
 
 **d)** Assuming $X_1,....,X_n ~ Exp(\lambda)$ and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings. 
 
-The variable opt_Lambda is the lambda value for witch the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed, which can be found in the following way: $\frac{ln(2)}{\lambda}$. The confidence interval of the median can be computed with the found theoretical median.
+The variable opt_Lambda is the lambda value for which the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed, which can be found in the following way: $\frac{ln(2)}{\lambda}$. The confidence interval of the median can be computed with the found theoretical median.
  
 ```{r}
 max_index <- which.max(pvalues)
@@ -219,7 +219,7 @@ binom.test(bill_smal40, length(data_tele))
 bill_less10 <- sum(data_tele < 10)
 bill_less10/length(data_tele)
 ```
-In the above cell can be observed that a binomial test is used with as x-value the data of the telephone company where the bills where lower than 40 euro. The null hypothesis of this test states that that the median bill is bigger or equal to 40 euro while the alternative hypothesis states that the the median bill is smaller than 40 euro. After conducted this test a p-value of 0.07 is found, which means that the Null hypothesis can not be rejected as it is higher than the standard alpha of 0.05. This also means that the alternative hypothesis can not be accepted. Furthermore a test is conducted to see whether the fraction of the bills less than 10 euro is less than 25%. In the above cell can be seen that the fraction is equal to 0.229 which is smaller than 0.25 and therefore we can state that the fraction is less than 25%.
+In the above cell one can observe that a binomial test is used with as x-value the data of the telephone company where the bills where lower than 40 euro. The null hypothesis of this test states that that the median bill is bigger or equal to 40 euro while the alternative hypothesis states that the the median bill is smaller than 40 euro. After conducted this test a p-value of 0.07 is found, which means that the Null hypothesis can not be rejected as it is higher than the standard alpha of 0.05. This also means that the alternative hypothesis can not be accepted. Furthermore a test is conducted to see whether the fraction of the bills less than 10 euro is less than 25%. In the above cell can be seen that the fraction is equal to 0.229 which is smaller than 0.25 and therefore we can state that the fraction is less than 25%.
 
 # Exercise 4
 To study the effect of energy drink a sample of 24 high school pupils were randomized to drinking either a softdrink or an energy drink after running for 60 meters. After half an hour they were asked to run again. For both sprints they were asked to sprint as fast they could, and the sprinting time was measured. The data is given in the file run.txt. [Courtesy class 5E, Stedelijk Gymnasium Leiden, 2010.]
