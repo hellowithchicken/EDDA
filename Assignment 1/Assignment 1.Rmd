@@ -36,7 +36,7 @@ boxplot(bw)
 shapiro.test(bw)$p.value
 
 ```
-The graphical methods show that the data is normal. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of `shapiro.test(bw)$p.value`, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
+The graphical methods show that the data is normal, due to the bell shaped histogram and straight diagonal QQ-plot. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of `shapiro.test(bw)$p.value`, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
 
 ```{r}
 m = mean(bw)
@@ -193,7 +193,7 @@ The 95% bootstrap confidence interval of the median can be observed above. The c
 
 **d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings. 
 
-The variable opt_Lambda is the lambda value for witch the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed, which can be found in the following way: $\frac{ln(2)}{\lambda}$. The confidence interval of the median can be computed with the found theoretical median.
+The variable opt_Lambda is the lambda value for which the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed, which can be found in the following way: $\frac{ln(2)}{\lambda}$. The confidence interval of the median can be computed with the found theoretical median.
  
 ```{r}
 max_index <- which.max(pvalues)
