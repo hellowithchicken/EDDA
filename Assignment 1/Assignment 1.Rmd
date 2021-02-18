@@ -12,10 +12,9 @@ library(tidyverse)
 library(rstudioapi)
 
 knitr::opts_chunk$set(echo = TRUE)
-options(knitr.table.format = "latex")
 setwd(dirname(getActiveDocumentContext()$path))
-# round numbers to 4 digits
-options(scipen = 1, digits = 4)
+# round numbers to 3 digits
+options(digits = 3)
 ```
 
 # Exercise 1
@@ -66,7 +65,6 @@ The confidence interval interval is different because the one-sample t-test retu
 We study the power function of the two-sample t-test (see Section 1.9 of Assignment 0). For n=m=30, mu=180, nu=175 and sd=5, generate 1000 samples x=rnorm(n,mu,sd) and y=rnorm(m,nu,sd), and record the 1000 p-values for testing H0: mu=nu. You can evaluate the power (at point nu=175) of this t-test as fraction of p-values that are smaller than 0.05.
 
 **a)** Set n=m=30, mu=180 and sd=5. Calculate now the power of the t-test for every value of nu in the grid seq(175,185,by=0.25). Plot the power as a function of nu.
-
 ```{r}
 n <- m <- 30
 mu <- 180
@@ -94,6 +92,8 @@ power_function<-function(grid,n,m,mu,sd) {
 fractions_A <- power_function(grid,n,m,mu,sd)
 
 ```
+Plots are shown further below.
+
 **b)** Set n=m=100, mu=180 and sd=5. Repeat the preceding exercise. Add the plot to the preceding plot.
 
 ```{r}
@@ -200,6 +200,7 @@ The variable opt_Lambda is the lambda value for witch the p-value was the highes
 max_index <- which.max(pvalues)
 
 opt_Lambda <- lambda[max_index]
+
 paste0("Optimal lambda value found: ", round(opt_Lambda, 4))
 
 theoretical_median = log(2)/opt_Lambda
@@ -319,7 +320,7 @@ table %>%
   ), Estimate = case_when(
     Type != "feedcasein" ~ as.numeric(table$Estimate[1]) + Estimate,
     TRUE ~ Estimate
-  )) %>%  mutate_if(is.numeric, funs(as.character(signif(., 4)))) %>%
+  )) %>%  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>%
     knitr::kable(.)
 ```
 From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight, however by looking at the p-values we can see that it is not significantly different from "casein" feed variety, therefore we cannot conclude which one of these two is the best.
