@@ -120,7 +120,7 @@ plot(grid,fractions_C)
 
 **d)** Explain your findings.
 
-More data points seems to have an influence on the narrowness of the plot. Furthermore, a bigger standard deviations gives a more wider distribution of fractions as presented in the plot of C with lower fractions. This can be explained by the fact that a higher standard deviations gives a higher uncertainty which results in a lower amount of fractions with a p-value below 0.05.
+More data points seems to have an influence on the narrowness of the plot and therefore seems to give a more precise outcome. Furthermore, a bigger standard deviations gives a more wider distribution of fractions as presented in the plot of C with lower values of the fractions. This can be explained by the fact that a higher standard deviations gives a higher uncertainty which results in a lower amount of fractions with a p-value below 0.05.
 
 # Exercise 3
 A telecommunication company has entered the market for mobile phones in a new country. The company's marketing manager conducts a survey of 200 new subscribers for mobile phones. The results of the survey are in the data set telephone.txt, which contains the first month bills X_1,...,X_200, in euros.
@@ -189,12 +189,12 @@ T1
 c(2*T1-Tstar975, 2*T1-Tstar25)
 
 ```
-The 95% bootstrap confidence interval of the median is [16.43, 36,576], with 28.905 as median.
+The 95% bootstrap confidence interval of the median can be observed above. The confidence interval of the bootstrap method changes each time it is executed because of the random nature of the method.
 
 
 **d)** Assuming X_1,....,X_n ~ Exp(lambda) and using the central limit theorem for the sample mean, estimate lambda and construct again a 95% confidence interval for the population median. Comment on your findings. 
 
-The variable opt_Lambda is the lambda value for witch the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed. This can be computed in the following way: $\frac{ln(2)}{\lambda}$. With this median the confidence interval can be computed.
+The variable opt_Lambda is the lambda value for witch the p-value was the highest. The CLT allows us to compute a normal confidence intervals to data that are not themselves normally distributed and therefore can be used to the exponentially distributed data. To do this for the median, a theoretical median needs to be computed, which can be found in the following way: $\frac{ln(2)}{\lambda}$. The confidence interval of the median can be computed with the found theoretical median.
  
 ```{r}
 max_index <- which.max(pvalues)
@@ -203,25 +203,25 @@ opt_Lambda <- lambda[max_index]
 paste0("Optimal lambda value found: ", round(opt_Lambda, 4))
 
 theoretical_median = log(2)/opt_Lambda
-round(theoretical_median,3)
+paste0("Theoretical median: ",round(theoretical_median,3))
 error = qnorm(0.975)*(theoretical_median/sqrt(length(data_tele)))
 c(round(theoretical_median - error, 3), round(theoretical_median + error,3))
 ```
 
- The results show a interval between 24.796 and 32.967 which is a narrow confidence interval. It also shows a different confidence interval than the bootstrap confidence interval which can be explained because of the random nature of the bootstrap method. 
+ The results show a 95% confidence interval between 24.80 and 32.97 which is a narrow confidence interval. It also shows a different confidence interval than the bootstrap confidence interval which can be explained because of the random nature of the bootstrap method. 
 
 **e)** Using an appropriate test, test the null hypothesis that the median bill is bigger or equal to 40 euro against the alternative that the median bill is smaller than 40 euro. Next, design and perform a test to check whether the fraction of the bills less than 10 euro is less than 25%.
+
 ```{r}
-bill_bigeq40 <- sum(data_tele>=40)
+
 bill_smal40 <- sum(data_tele<40)
 
-binom.test(bill_bigeq40, length(data_tele),p=0.5)
-binom.test(bill_smal40, length(data_tele),p=0.5)
+binom.test(bill_smal40, length(data_tele))
 
 bill_less10 <- sum(data_tele < 10)
 bill_less10/length(data_tele)
 ```
-
+In the above cell the test can be observed that a binomial test is used with as x-value the data of the telephone company where the bills where lower than 40 euro. This was the null hypothesis states that that the median bill is bigger or equal to 40 euro while the alternative hypothesis states that the the median bill is smaller than 40 euro. After conducted this test a p-value of 0.07 is found, which means that the Null hypothesis can not be rejected as it is higher than the standard alpha of 0.05. This also means that the alternative hypothesis can not be accepted. Furthermore a test is conducted to see whether the fraction of the bills less than 10 euro is less than 25%. In the above cell can be seen that the fraction is equal to 0.229 which is smaller than 0.25 and therefore we can state that the fraction is less than 25%.
 
 # Exercise 4
 To study the effect of energy drink a sample of 24 high school pupils were randomized to drinking either a softdrink or an energy drink after running for 60 meters. After half an hour they were asked to run again. For both sprints they were asked to sprint as fast they could, and the sprinting time was measured. The data is given in the file run.txt. [Courtesy class 5E, Stedelijk Gymnasium Leiden, 2010.]
