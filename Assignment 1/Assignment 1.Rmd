@@ -36,7 +36,7 @@ boxplot(bw)
 shapiro.test(bw)$p.value
 
 ```
-The graphical methods show that the data is normal, due to the bell shaped histogram and straight diagonal QQ-plot. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of `shapiro.test(bw)$p.value`, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
+The graphical methods show that the data is normal, due to the bell shaped histogram and straight diagonal QQ-plot. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of > 0.05, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
 
 ```{r}
 m = mean(bw)
@@ -44,7 +44,7 @@ sd = sd(bw)
 n = length(bw)
 error = qnorm(0.95)*sd/sqrt(n)
 ci = c(m-error, m+error)
-paste0("mean: ", m)
+paste0("mean: ", round(m, 3))
 paste0("90% confidence interval: (", round(ci[1], 3), ",", round(ci[2], 3), ")")
 ```
 
@@ -52,7 +52,7 @@ paste0("90% confidence interval: (", round(ci[1], 3), ",", round(ci[2], 3), ")")
 **b)** An expert claims that the mean birthweight is bigger than 2800, verify this claim by using a t-test. What is the outcome of the test if you take $\alpha$ = 0.1?  And other values of $\alpha$?
 
 ```{r}
-t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)
+t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)$p.value
 ```
 
 A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an alpha of 0.1. The claim is significant for all alpha's above 0.014 and insignificant for alpha's below 0.014.
