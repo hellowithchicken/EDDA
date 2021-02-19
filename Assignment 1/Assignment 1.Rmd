@@ -26,17 +26,17 @@ The data set birthweight.txt contains the birthweights of 188 newborn babies.  W
 To check normality for the data we use a qqplot, historgram, box plot and Shapiro-Wilks test. 
 ```{r}
 par(mfrow=c(1,3))
-data=read.table(file="data/birthweight.txt",header=TRUE)
+data <- read.table(file="data/birthweight.txt",header=TRUE)
 
-bw = data$birthweight
+bw <- data$birthweight
 hist(bw)
 qqnorm(bw)
 boxplot(bw)
 # perform Shapiro-Wilk normality test
-shapiro.test(bw)$p.value
+round(shapiro.test(bw)$p.value, 3)
 
 ```
-The graphical methods show that the data is normal, due to the bell shaped histogram and straight diagonal QQ-plot. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of `shapiro.test(bw)$p.value`, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
+The graphical methods show that the data is normal, due to the bell shaped histogram and straight diagonal QQ-plot. The Shapiro-Wilk test reinforces this assumption as it shows a p-value of > 0.05, meaning that the $H_0$ is not rejected and therefore the data is normal. Furthermore, a point estimate for $\mu$ is conducted along side a 90% confidence interval.
 
 ```{r}
 m = mean(bw)
@@ -44,7 +44,7 @@ sd = sd(bw)
 n = length(bw)
 error = qnorm(0.95)*sd/sqrt(n)
 ci = c(m-error, m+error)
-paste0("mean: ", m)
+paste0("mean: ", round(m, 3))
 paste0("90% confidence interval: (", round(ci[1], 3), ",", round(ci[2], 3), ")")
 ```
 
@@ -52,7 +52,7 @@ paste0("90% confidence interval: (", round(ci[1], 3), ",", round(ci[2], 3), ")")
 **b)** An expert claims that the mean birthweight is bigger than 2800, verify this claim by using a t-test. What is the outcome of the test if you take $\alpha$ = 0.1?  And other values of $\alpha$?
 
 ```{r}
-t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)
+round(t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)$p.value, 3)
 ```
 
 A t-test is performed to verify the claim that the mean birthweight is bigger than 2800. The t-test shows a p-value of 0.014. This means that this claim is significant for an alpha of 0.1. The claim is significant for all alpha's above 0.014 and insignificant for alpha's below 0.014.
@@ -182,8 +182,9 @@ for (i in 1:B){
 Tstar25 <- quantile(Tstar,0.025)
 Tstar975 <- quantile(Tstar, 0.975)
 
-T1
-c(2*T1-Tstar975, 2*T1-Tstar25)
+paste0("Data median: ", round(T1, 3))
+paste0("95% confidence interval: (", round(2*T1-Tstar975, 3), 
+       ",", round(2*T1-Tstar25, 3), ")")
 
 ```
 The 95% bootstrap confidence interval of the median can be observed above. The confidence interval of the bootstrap method changes each time it is executed because of the random nature of the method.
@@ -198,15 +199,26 @@ max_index <- which.max(pvalues)
 
 opt_Lambda <- lambda[max_index]
 
-paste0("Optimal lambda value found: ", round(opt_Lambda, 4))
+paste0("Optimal lambda value found: ", round(opt_Lambda, 3))
 
-theoretical_median = log(2)/opt_Lambda
-paste0("Theoretical median: ",round(theoretical_median,3))
-error = qnorm(0.975)*(theoretical_median/sqrt(length(data_tele)))
-c(round(theoretical_median - error, 3), round(theoretical_median + error,3))
+# simulate exponential distribution and calculate the ci
+medians <- c()
+B <- 1000
+n <- length(data_tele)
+
+for (i in 1:B){
+  medians <- c(medians, median(rexp(n,opt_Lambda)))
+}
+
+sd = sd(medians)
+m = mean(medians)
+error = qnorm(0.975)*sd/sqrt(B)
+ci = c(m-error, m+error)
+paste0("Median estimate: ", round(m, 3))
+paste0("95% confidence interval: (", round(ci[1], 3), ",", round(ci[2], 3), ")")
 ```
 
- The results show a 95% confidence interval between 24.80 and 32.97 which is a narrow confidence interval. It also shows a different confidence interval than the bootstrap confidence interval which can be explained because of the random nature of the bootstrap.
+Optimal $\lambda$ was selected from the experiment in b) that resulted in the highest p-value. The results show a 95% confidence interval that is more narrow than the one found via bootstrapping. This is attributed to the stochastic nature of the bootstrap and the fact that bootstrap used real data clearly deviated from perfect exponential distribution.
  
 **e)** Using an appropriate test, test the null hypothesis that the median bill is bigger or equal to 40 euro against the alternative that the median bill is smaller than 40 euro. Next, design and perform a test to check whether the fraction of the bills less than 10 euro is less than 25%.
 
@@ -245,15 +257,15 @@ data <- data %>%
 lemo <- data %>% 
   filter(drink == "lemo")
 paste0("p-value for soft drink: ", 
-       round(t.test(lemo$before, lemo$after, paired = TRUE)$p.value, 4))
+       round(t.test(lemo$before, lemo$after, paired = TRUE)$p.value, 3))
 # filter for energy and perform paired t-test
 energy <- data %>% 
   filter(drink == "energy")
 paste0("p-value for energy drink: ", 
-       round(t.test(energy$before, energy$after, paired = TRUE)$p.value, 4))
+       round(t.test(energy$before, energy$after, paired = TRUE)$p.value, 3))
 ```
 
-Paired t-test was selected for this task as the experimental data was collected for the same individual after and before drink. For both energy and soft-drink groups there does not seem to be a significant difference in means of the running times.
+Paired t-test was selected for this task as the experimental data was collected for the same individual after and before drink. For both energy and soft-drink groups there does not seem to be a significant difference in means of the running times as the p-values are < 0.05.
 
 **c)** For each pupil compute the time difference between the two running tasks. Test whether these time differences are effected by the type of drink.
 
@@ -265,7 +277,7 @@ The p-value is > 0.05, therefore the means of the two populations are not signif
 
 **d)** Can you think of a plausible objection to the design of the experiment in b) if the main aim was to test whether drinking the energy drink speeds up the running? Is there a similar objection to the design of the experiment in c)? Comment on all your findings in this exercise.
 
-In both experiments the participants were asked to run on the same day. This could strongly influence the outcomes in data. Therefore, the setup was certainly not ideal to check the influence of both drinks. Same objection does not hold for the experiment in c) since both of the groups were under the same experimental conditions. 
+In both experiments the participants were asked to run on the same day. This could strongly influence the outcomes in data. Therefore, the setup was certainly not ideal to check the influence of both drinks. Same objection does not hold for the experiment in c) since both of the groups were independent and underwent same experimental conditions. 
 
 # Exercise 5
 
@@ -286,16 +298,16 @@ qqnorm(meatmeal$weight)
 qqnorm(sunflower$weight)
 # perform t-test, the data is not paired
 paste0("t-test p-value: ", 
-       round(t.test(meatmeal, sunflower)$p.value, 4))
+       round(t.test(meatmeal, sunflower)$p.value, 3))
 # Mann-Whitney test
 paste0("Mann-Whitney test p-value: ", 
-       round(wilcox.test(meatmeal$weight, sunflower$weight)$p.value, 4))
+       round(wilcox.test(meatmeal$weight, sunflower$weight)$p.value, 3))
 # Kolmogorov-Smirnov test
 paste0("Kolmogorov-Smirnov test: ", 
-       round(ks.test(meatmeal$weight, sunflower$weight)$p.value, 4))
+       round(ks.test(meatmeal$weight, sunflower$weight)$p.value, 3))
 ```
 
-Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks, therefore the data is independent. From t-test we can see that the p-values <0.05, this would conclude that the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05, therefore we cannot conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can see that p-value is >0.05, therefore we cannot conclude that the means are different. From qqnorm plots we can observe that the sunflower feed data is not normal, therefore t-test here is inappropriate.
+Data in chickwts is not paired as the "treatment" of different feed was applied to different newly-hatched chicks, therefore the data is independent. From t-test we can see that the p-values <0.05, this would conclude that the means between the two groups are significantly different. From Mann-Whitney test we can see that p-value is >0.05, therefore we cannot conclude that the medians of the two datasets are different. From Kolgomorov-Smirnov test we can see that p-value is >0.05, therefore we cannot conclude that the means are different. From qqnorm plots we can observe that the "sunflower" feed data is not normal, therefore t-test here is inappropriate.
 
 **b)**Conduct a one-way ANOVA to determine whether the type of feed supplement has an effect on the weight of the chicks. Give the estimated chick weights for each of the six feed supplements. What is the best feed supplement?
 
@@ -304,7 +316,7 @@ chickaov <- lm(weight~feed, data = chickwts)
 # performing one-way ANOVA
 anova(chickaov)
 ```
-From the results of one-way ANOVA we can see that the p-values is < 0.05, therefore we can conclude that at least one of the means between different feed varieties are significantly different. 
+From the results of one-way ANOVA we can see that the p-values is < 0.05, therefore we can conclude that at least one of the means between different feed varieties are significantly different from the rest. 
 ```{r, warning=FALSE}
 #extracting more information
 table <- data.frame(summary(chickaov)$coefficients) 
@@ -320,7 +332,7 @@ table %>%
   )) %>%  mutate_if(is.numeric, funs(as.character(signif(., 3)))) %>%
     knitr::kable(.)
 ```
-From summary statistics it seems that "sunflower" feed is the feed resulting in highest weight, however by looking at the p-values we can see that it is not significantly different from "casein" feed variety, therefore we cannot conclude which one of these two is the best.
+From summary statistics it seems that "sunflower" feed is the feed resulting in the highest weight, however by looking at the p-values we can see that it is not significantly different from "casein" feed variety, therefore we cannot conclude which one of these two is the best.
 
 **c)**Check the ANOVA model assumptions by using relevant diagnostic tools.
 
@@ -337,4 +349,4 @@ From qqplot the assumption of normality holds.
 kruskal.test(weight~feed, data = chickwts)$p.value
 ```
 
-With Kruskal-Wallis test we arrive to the same conclusion as with ANOVA. This is an expected outcome as ANOVA works with normal data (assumption verified in c) ) and Kruskal-Wallis test works with any type of data.
+With Kruskal-Wallis test we arrive to the same conclusion as with ANOVA. This is an expected outcome as ANOVA works with normal data (assumption verified in c) and Kruskal-Wallis test works with any type of data.
