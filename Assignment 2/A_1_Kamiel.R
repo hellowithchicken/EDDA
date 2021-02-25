@@ -21,7 +21,6 @@ shapiro.test(bw)
 m = mean(bw)
 s = sd(bw)
 n = length(bw)
-2*2
 error = qnorm(0.95)*s/sqrt(n)
 error
 ci = c(m-error, m+error)
@@ -30,7 +29,7 @@ ci
 ?t.test
 
 t.test(bw, mu=2800, alternative = "greater", conf.level = 0.95)
-a
+
 m_2800 = numeric(length(bw))
 
 for (i in 1:length(bw)){m_2800[i] = 2800}
@@ -140,7 +139,6 @@ plot(se,power, main = "30 - 15")
 
 ######################## exercise 3 #############################################
 
-library("EnvStats")
 data=read.table(file="data/telephone.txt",header=TRUE)
 data
 bills = data$Bills
@@ -158,8 +156,6 @@ lines(x,dexp(x),type="l", col="blue", lwd=2)
 t = median(bills)
 t
 
-mean(bills)
-eexp(bills, method = "mle/mme", ci = TRUE, ci.type = "two-sided",  conf.level = 0.95)
 
 
 X = seq(0.01, 0.1, 0.0005)
@@ -215,11 +211,8 @@ c(2*T1-Tstar975,2*T1-Tstar25)
 
 
 ######################### 3d ###############
-b_40 = sum(bills>=40)
-b_40b = sum(bills<40)
-
-binom.test(b_40, length(bills), p=0.5)
-binom.test(b_40b, length(bills), p=0.5)
+b_40 = sum(bills>40)
+binom.test(b_40, length(bills))
 b_10 = sum(bills<10)
 b_10/length(bills)
 
@@ -237,8 +230,6 @@ second_run_l = lemo_data$after
 
 first_run_e = energy_data$before
 second_run_e = energy_data$before
-
-
 plot(first_run, second_run)
 cor(first_run, second_run)
 
@@ -284,8 +275,7 @@ sun_flower = chickwts[which((chickwts$feed == "sunflower")),]$weight
 
 hist(meat_meal)
 hist(sun_flower)
-qqnorm(meat_meal)
-qqnorm(sun_flower)
+
 shapiro.test(meat_meal)
 shapiro.test(sun_flower)
 
