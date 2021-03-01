@@ -16,4 +16,3 @@
 "15" 264 "warm" "dry"
 "16" 60 "warm" "wet"
 "17" 72 "warm" "wet"
-"18" 72 "warm" "wet"
