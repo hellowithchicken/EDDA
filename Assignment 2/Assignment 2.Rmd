@@ -17,16 +17,66 @@ setwd(dirname(getActiveDocumentContext()$path))
 options(digits = 3)
 ```
 
+
 # Exercise 1
-Moldy bread If left alone bread will become moldy, rot or decay otherwise.  To investigate the influence of temperature and  humidity  on  this  process,  the  time  to  decay  was  measured  for  18  slices  of  white  bread,  which  were placed in 3 different environments and humidified or not.  The data are given in the filebread.txt, with the first column time to decay in hours, the second column the environment (cold, warm or intermediate temperature) and the third column the humidity.
+Moldy bread If left alone bread will become moldy, rot or decay otherwise.  To investigate the influence of temperature and  humidity  on  this  process,  the  time  to  decay  was  measured  for  18  slices  of  white  bread,  which  were placed in 3 different environments and humidified or not.  The data are given in the file bread.txt, with the first column time to decay in hours, the second column the environment (cold, warm or intermediate temperature) and the third column the humidity.
 
 
-
+**a)**The 18 slices came from a single loaf, but were randomized to the 6 combinations of conditions.  Present an R-code for this randomization process.
 ```{r}
 data <- read.table(file="data/bread.txt",header=TRUE)
+I=3; J=2; N=3
+rbind(rep(1:I,each=N*J),rep(1:J,N*I),sample(1:(N*I*J)))
+```
+
+**b)**Make two boxplots ofhoursversus the two factors and two interaction plots (keeping the two factors fixed in turn).
+```{r}
+par(mfrow=c(1,2))
+attach(data)
+boxplot(hours~environment)
+boxplot(hours~humidity)
+interaction.plot(humidity,environment,hours)
+interaction.plot(environment,humidity,hours)
 
 ```
 
+**c)**Perform  an  analysis  of  variance  to  test  for  effect  of  the  factors temperature,humidity,  and  the interaction.  Describe the interaction effect in words.
+```{r}
+
+data$environment=as.factor(data$environment)
+data$humidity=as.factor(data$humidity)
+dataaov=lm(hours~humidity*environment)
+anova(dataaov)
+
+summary(dataaov)
+
+# Without interaction
+
+data$humidity=as.factor(data$humidity)
+data$environment=as.factor(data$environment)
+dataaov=lm(hours~humidity+environment,data=data)
+anova(dataaov)
+
+```
+ We see that the humidity:environment column show a significant p-value which means that the there is evidence for the interaction effect between humidity and environment.
+
+**d)** Which of the two factors has the greatest (numerical) influence on the decay?  Is this a good question?
+
+When we want to know which factor has the greatest influence we want to use the additive model as used above. This shows a p-value of 0.026 for humidity and a p-value of 3.7e-05 for environemnt. This means that the environment has the greatest influence. It is not 
+
+**e)**  Check the model assumptions by using relevant diagnostic tools.  Are there any outliers?
+
+```{r}
+par(mfrow=c(1,2))
+contrasts(data$humidity)=contr.sum; contrasts(data$environment)=contr.sum
+dataaov2=lm(hours~humidity*environment,data=data); 
+summary(dataaov2)
+qqnorm(residuals(dataaov2)) 
+shapiro.test(residuals(dataaov2))
+plot(fitted(dataaov2),residuals(dataaov2))
+
+```
+The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. Furthermore we used a Shapiro-Wilks test to see if the test can back this assumption. The Shapiro-Wils test showed a p-value of 0.2 which means that the residual data is normally distributed. There is also looked at the spread of the residuals, which showed that there are two outliers around 240.
 # Exercise 2
 
 A researcher is interested in the time it takes a student to find a certain product on the internet using a search engine. There are three different types of interfaces with the search engine and especially the effect of these interfaces is of importance. There are five different types of students, indicating their level of computer skill (the lower the value of this indicator, the better the computer skill of the corresponding student). Fifteen students are selected; three from each group with a certain level of computer skill. The data is given in the file search.txt. Assume that the experiment was run according to a randomized block design which you make in a). (Beware that the levels of the factors are coded by numbers.)
@@ -84,3 +134,34 @@ attach(data_search)
 aovsearch = lm(time~interface)
 anova(aovsearch)
 ```
+
+
+# Exercise 4
+
+Stochastic models for word counts are used in quantitative studies on literary styles.  Statistical analysis of the counts can, for example, be used to solve controversies about true author ships.  Another example is the analysis of word frequencies in relation to Jane Austen’s novel Sanditon.  At the time Austen died, this novel was only partly completed.  Austen, however, had made a summary for the remaining part.  An admirer of Austen’s work finished the novel, imitating Austen’s style as much as possible.  The file austen.txt contains counts of different words in some of Austen’s novels:  chapters 1 and 3 of Sense and Sensibility(stored in the Sense column), chapters 1, 2 and 3 of Emma(column Emma), chapters 1 and 6 of Sanditon(both written by Austen herself, column Sand1) and chapters 12 and 24 of Sanditon(both written by the admirer,Sand2)
+
+**a)**
+Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
+
+The contingency table test for homogeneity is appropriate because we look at a count of units in different categories of two factors which are words and story.
+
+**b)** Using  the  given  data  set,  investigate  whether  Austen  herself  was  consistent  in  her  different  novels. Where are the main inconsistencies?
+
+```{r}
+data=read.table(file="data/austen.txt",header=TRUE)
+austen = data[,1:3]
+z = chisq.test(austen)
+z
+residuals(z)
+```
+
+She is not inconsistent as the p-value is above 0.05. The main inconsistency where the words "a", "that" and "without"
+
+```{r}
+z = chisq.test(data)
+z
+residuals(z)
+
+```
+The fan is inconsistent as the p-value of the test is below 0.05. The main inconsistencies were for the words  "that" and "an". 
+
