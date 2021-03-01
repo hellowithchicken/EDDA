@@ -99,6 +99,94 @@ summary(aovsearch) # Estimate interface 3 = 4.46, skill 3 = 3.03, so 3-3 gives:
 ```
 **c)** Check the model assumptions by using relevant diagnostic tools.
 ```{r}
+par(mfrow=c(1,2))
+qqnorm(residuals(aovsearch))
+plot(fitted(aovsearch),residuals(aovsearch))
+```
+**d)** Perform the Friedman test tot test whether there is an effect of interface.
+```{r}
+friedman.test(time,interface,skill)
+```
+**e)**Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
+```{r}
+attach(data_search)
 
+aovsearch = lm(time~interface)
+anova(aovsearch)
+```
+# Exercise 3
+In a study on the effect of feedingstuffs on lactation a sample of nine cows were fed with two types of food, and their milk production was measured. All cows were fed both types of food, during two periods, with a neutral period in-between to try and wash out carry-over effects. The order of the types of food was randomized over the cows. The observed data can be found in the file cow.txt, where A and B refer to the types of feedingstuffs.
+
+**a)** Test whether the type of feedingstuffs influences milk production using an ordinary "fixed effects" model, fitted with lm. Estimate the difference in milk production.
+```{r}
+data_cow <- read.table(file="data/cow.txt",header=TRUE)
+attach(data_cow)
+
+aovcow <- lm(milk~factor(treatment)+factor(order)+id)
+anova(aovcow)
+
+summary(aovcow)
+```
+
+**b)** Repeat a) and b) by performing a mixed eects analysis, modelling the cow effect as a random effect (use the function lmer). Compare your results to the results found by using a mixed effects model.
+```{r}
+library(lme4)
+attach(data_cow)
+
+cow_lmer <- lmer(milk~factor(treatment)+factor(order)+(1|id), REML=FALSE)
+summary(cow_lmer)
+```
+
+**c)** Study the commands:
+```{r}
+attach(cow)
+t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
+```
+Does this produce a valid test for a difference in milk production? Is its conclusion compatible with the one obtained in a)? Why?
+
+# Exercise 4
+Stochastic models for word counts are used in quantitative studies on literary styles. Statistical analysis of the counts can, for example, be used to solve controversies about true authorships. Another example is the analysis of word frequencies in relation to Jane Austen's novel Sanditon. At the time Austen died, this novel was only partly completed. Austen, however, had made a summary for the remaining part. An admirer of Austen's work finished the novel, imitating Austen's style as much as possible. The file austen.txt contains counts of different words in some of Austen's novels: chapters 1 and 3 of Sense and Sensibility (stored in the Sense column), chapters 1, 2 and 3 of Emma (column Emma), chapters 1 and 6 of Sanditon (both written by Austen herself, column Sand1) and chapters 12 and 24 of Sanditon (both written by the admirer, Sand2).
+
+**a)** Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
+```{r}
+# Not directly? Because the data is not really a contingency table but more just frequency table, there are not two factors
+```
+
+**b)** Using the given data set, investigate whether Austen herself was consistent in her different novels. Where are the main inconsistencies?
+```{r}
+data_aus <- read.table(file="data/austen.txt",header=TRUE)
+data_aus
+z <- chisq.test(data_aus[1:3],simulate.p.value=TRUE); z
+
+residuals(z)
+# Looking at this table we can state that in the Sanditon book she used more "a" and less "that" then in her earlier work.
+```
+
+**c)** Was the admirer successful in imitating Austen's style? Perform a test including all data. If he wasnot successful, where are the differences?
+```{r}
+z <- chisq.test(data_aus,simulate.p.value=TRUE); z
+
+residuals(z)
+
+# Looking at this table we can see that the admirer uses considerably more "an" and less "that" then Austin's original works.
+```
+# Exercise 5
+The data in expensescrime.txt were obtained to determine factors related to state expenditures on criminal activities (courts, police, etc.) The variables are: state (indicating the state in the USA), expend (state expenditures on criminal activities in $1000), bad (crime rate per 100000), crime (number of persons under criminal supervision), lawyers (number of lawyers in the state), employ (number of persons employed in the state) and pop (population of the state in 1000). In the regression analysis, take expend as response variable and bad, crime, lawyers, employ and pop as explanatory variables.
+
+**a)** Make some graphical summaries of the data. Investigate the problem of potential and influence points,
+and the problem of collinearity.
+```{r}
+data_crime <- read.table(file="data/expensescrime.txt",header=TRUE)
+
+par(mfrow=c(1,3));plot(data_crime[,c(3,4,5)])
+par(mfrow=c(1,3));plot(data_crime[,c(2,6,7)])
+par(mfrow=c(1,3));plot(data_crime[,c(2,3,6)])
+
+par(mfrow=c(1,3));for (i in c(3,4,5)) hist(data_crime[,i],main=names(data_crime)[i])
+
+attach(data_crime)
+lm_crime <- lm(expend~bad+crime+employ,data=data_crime)
+vif(lm_crime)
+round(cor(lm_crime),2)
 ```
 
