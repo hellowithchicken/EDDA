@@ -143,7 +143,7 @@ Stochastic models for word counts are used in quantitative studies on literary s
 **a)**
 Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
 
-The contingency table test for homogeneity is appropriate because we look at a count of units in different categories of two factors which are words and story.
+The contingency table test for homogeneity is appropriate because we want to know if the fan writer imitates Austen in a good way. This means that we want to test whether or not the different columns of data in the table come from the same population (writer) or not. The H0 of the contingency table test for homogeneity states that the distribution of the words is the same for the stories.
 
 **b)** Using  the  given  data  set,  investigate  whether  Austen  herself  was  consistent  in  her  different  novels. Where are the main inconsistencies?
 
@@ -155,7 +155,7 @@ z
 residuals(z)
 ```
 
-She is not inconsistent as the p-value is above 0.05. The main inconsistency where the words "a", "that" and "without"
+She is not inconsistent as the p-value is above 0.05. This means that we cannot reject the H0. She does however have some main inconsistency, which where the words "a", "that" and "without". As can be seen in the residual tanle above.
 
 ```{r}
 z = chisq.test(data)
@@ -163,5 +163,5 @@ z
 residuals(z)
 
 ```
-The fan is inconsistent as the p-value of the test is below 0.05. The main inconsistencies were for the words  "that" and "an". 
+The fan is inconsistent as the p-value of the test is below 0.05. Therefore we have to reject the H0 and accept that the distribution of the words in the stories are not the same. Because Austen herself did not have this inconsistency we can say that the inconsistency is caused by the fan writer. The main inconsistencies were for the words  "that" and "an". As can be seen in the residual tanle above.
 
