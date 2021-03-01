@@ -29,7 +29,7 @@ humid <- c("dry","wet")
 temp <- c("cold", "intermediate","warm")
 
 combination <- data.frame(cbind(c(humid,humid,humid),c(temp,temp)))
-
+combination
 ```
 
 **b)** Make two boxplots of hours versus the two factors and two interaction plots (keeping the two factors fixed in turn).
