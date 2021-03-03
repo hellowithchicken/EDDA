@@ -25,7 +25,6 @@ Moldy bread If left alone bread will become moldy, rot or decay otherwise.  To i
 **a)**The 18 slices came from a single loaf, but were randomized to the 6 combinations of conditions.  Present an R-code for this randomization process.
 ```{r}
 data <- read.table(file="data/bread.txt",header=TRUE)
-data
 I=3; J=2; N=3
 
 env = rep(c("cold","intermediate","warm"), each=N*J)
@@ -63,15 +62,20 @@ dataaov=lm(hours~humidity+environment,data=data)
 anova(dataaov)
 
 ```
-When looking at the two-way anova model we see that it consists of the following terms: Y_{ijk} = \mu_{ij} + e_{ijk} = \mu + alpha_{i} + \beta_{j} + \gamma_{ij} + e_{eijk} We decompose the formula it this way such that \mu is the overall mean, \alpha_{i} and \beta_{j} are the main effect of level i and j of the first factor and second factor respectively and \gamma_{ij} the interaction effect. 
+When looking at the two-way anova model we see that it consists of the following terms: Y_{ijk} = $\mu_{ij}$ + e_{ijk} = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
 
 In order to test the effect of the temperature,humidity,  and  the interaction we set up 3 hypotheses which are:
-H_{AB}: \gamma_{ij} = 0 for every (i, j) (no interactions between factor A and B)
-H_{A}: \alpha_{i} = 0 for every i (no main effect of factor A)
-H_{B}:\beta_{j} = 0 for every j (no main effect of factor B)
+$H_{AB}$: $\gamma_{ij}$ = 0 for every (i, j) (no interactions between factor A and B)
 
- 
- We see that the humidity:environment column in the Anova test shows a significant p-value of 3.7e-07 which means that the there is evidence for the interaction effect between humidity and environment. 
+$H_{A}$: $\alpha_{i}$ = 0 for every i (no main effect of factor A)
+
+$H_{B}$:$\beta_{j}$ = 0 for every j (no main effect of factor B)
+
+We use the test statistics $F_{AB}$ for $H_{AB}$, $F_{A}$ for $H_{A}$ and $F_{B}$ for $H_{B}$ where F is the F-distribution. 
+
+To see if the Hypotheses can be rejected we want to look at the probability that P(F>$f_{AB}$), P(F>$f_{A}$) and P(F>$f_{B}$), the bigger the F value the lower the probability that the Hypothesis lays under a F-distribution and therefore the Hypothesis can be rejected.
+
+We see that the humidity has a p-value of 4.3e-06, environment a p-value of 2.5e-10 and the interaction between the two (humidity:environment) shows a p-value of 3.7e-07. This means that humidity, environment and the interaction effect between humidity and environment have a significant influence on the hours, which means we can reject $H_{A}$, $H_{B}$ and $H_{AB}$. 
 
 **d)** Which of the two factors has the greatest (numerical) influence on the decay?  Is this a good question?
 
