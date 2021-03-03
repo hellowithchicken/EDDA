@@ -44,6 +44,7 @@ interaction.plot(environment,humidity,hours)
 
 ```
 
+
 **c)**Perform  an  analysis  of  variance  to  test  for  effect  of  the  factors temperature,humidity,  and  the interaction.  Describe the interaction effect in words.
 ```{r}
 
@@ -75,25 +76,27 @@ We use the test statistics $F_{AB}$ for $H_{AB}$, $F_{A}$ for $H_{A}$ and $F_{B}
 
 To see if the Hypotheses can be rejected we want to look at the probability that P(F>$f_{AB}$), P(F>$f_{A}$) and P(F>$f_{B}$), the bigger the F value the lower the probability that the Hypothesis lays under a F-distribution and therefore the Hypothesis can be rejected.
 
-We see that the humidity has a p-value of 4.3e-06, environment a p-value of 2.5e-10 and the interaction between the two (humidity:environment) shows a p-value of 3.7e-07. This means that humidity, environment and the interaction effect between humidity and environment have a significant influence on the hours, which means we can reject $H_{A}$, $H_{B}$ and $H_{AB}$. 
+We see that the humidity has a p-value of 4.3e-06, environment a p-value of 2.5e-10 and the interaction between the two (humidity:environment) shows a p-value of 3.7e-07. This means that humidity, environment and the interaction effect between humidity and environment have a significant influence on the hours, which means we can reject $H_{A}$, $H_{B}$ and $H_{AB}$.
+
+The interaction effect looks at the difference of differences, for example: it looks at the difference in hours for environment = cold and environment = warm for humidity = wet. Then it looks the difference between environment = cold and environment = warm for humidity = dry. It then looks at the difference betwen those differences and when this difference is high it shows that there is indeed interaction.
 
 **d)** Which of the two factors has the greatest (numerical) influence on the decay?  Is this a good question?
 
-When we want to know which factor has the greatest influence we want to use the additive model as used above. This shows a p-value of 0.026 for humidity and a p-value of 3.7e-05 for environemnt. This means that the environment has the greatest influence. It is not 
+When we want to know which factor has the greatest influence we want to use the additive model as used above. This shows a p-value of 0.026 for humidity and a p-value of 3.7e-05 for environemnt. This means that the environment has the greatest influence. 
+
 
 **e)**  Check the model assumptions by using relevant diagnostic tools.  Are there any outliers?
 
 ```{r}
 par(mfrow=c(1,2))
-contrasts(data$humidity)=contr.sum; contrasts(data$environment)=contr.sum
 dataaov2=lm(hours~humidity*environment,data=data); 
-summary(dataaov2)
-qqnorm(residuals(dataaov2)) 
 shapiro.test(residuals(dataaov2))
-plot(fitted(dataaov2),residuals(dataaov2))
-
+plot(dataaov2, 1)
+plot(dataaov, 2)
 ```
-The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. Furthermore we used a Shapiro-Wilks test to see if the test can back this assumption. The Shapiro-Wils test showed a p-value of 0.2 which means that the residual data is normally distributed. There is also looked at the spread of the residuals, which showed that there are two outliers around 240.
+The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. Furthermore we used a Shapiro-Wilks test to see if the test can back this assumption. The Shapiro-Wils test showed a p-value of 0.2 which means that the data is normally distributed. There is also looked at the spread of the residuals, which showed that there are two outliers which are number 5, 7 and 8 in the residual plot.
+
+
 # Exercise 2
 
 A researcher is interested in the time it takes a student to find a certain product on the internet using a search engine. There are three different types of interfaces with the search engine and especially the effect of these interfaces is of importance. There are five different types of students, indicating their level of computer skill (the lower the value of this indicator, the better the computer skill of the corresponding student). Fifteen students are selected; three from each group with a certain level of computer skill. The data is given in the file search.txt. Assume that the experiment was run according to a randomized block design which you make in a). (Beware that the levels of the factors are coded by numbers.)
@@ -160,7 +163,7 @@ Stochastic models for word counts are used in quantitative studies on literary s
 **a)**
 Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
 
-The contingency table test for homogeneity is appropriate because we want to know if the fan writer imitates Austen in a good way. This means that we want to test whether or not the different columns of data in the table come from the same population (writer) or not. The H0 of the contingency table test for homogeneity states that the distribution of the words is the same for the stories.
+The contingency table test for homogeneity is appropriate because we want to know if the fan writer imitates Austen in a good way. This means that we want to test whether or not the different columns of data in the table come from the same population (writer) or not, which would be the case it the fan imitated Austen correctly. The H0 of the contingency table test for homogeneity states that the distribution of the words is the same for the stories.
 
 **b)** Using  the  given  data  set,  investigate  whether  Austen  herself  was  consistent  in  her  different  novels. Where are the main inconsistencies?
 
