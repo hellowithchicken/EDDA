@@ -26,10 +26,8 @@ Moldy bread If left alone bread will become moldy, rot or decay otherwise.  To i
 ```{r}
 data <- read.table(file="data/bread.txt",header=TRUE)
 I=3; J=2; N=3
-
 env = rep(c("cold","intermediate","warm"), each=N*J)
 hum = rep(c("dry", "wet"),each = N*I)
-
 cbind(env, hum, sample(1:(N*I*J)))
 ```
 
@@ -56,11 +54,10 @@ anova(dataaov)
 summary(dataaov)
 
 # Without interaction
-
-data$humidity=as.factor(data$humidity)
-data$environment=as.factor(data$environment)
-dataaov=lm(hours~humidity+environment,data=data)
-anova(dataaov)
+#data$humidity=as.factor(data$humidity)
+#data$environment=as.factor(data$environment)
+#dataaov=lm(hours~humidity+environment,data=data)
+#anova(dataaov)
 
 ```
 When looking at the two-way anova model we see that it consists of the following terms: Y_{ijk} = $\mu_{ij}$ + e_{ijk} = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
@@ -92,9 +89,9 @@ par(mfrow=c(1,2))
 dataaov2=lm(hours~humidity*environment,data=data); 
 shapiro.test(residuals(dataaov2))
 plot(dataaov2, 1)
-plot(dataaov, 2)
+plot(dataaov2, 2)
 ```
-The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. Furthermore we used a Shapiro-Wilks test to see if the test can back this assumption. The Shapiro-Wils test showed a p-value of 0.2 which means that the data is normally distributed. There is also looked at the spread of the residuals, which showed that there are two outliers which are number 5, 7 and 8 in the residual plot.
+The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. Furthermore we used a Shapiro-Wilks test to see if the test can back this assumption. The Shapiro-Wils test showed a p-value of 0.2 which means that the data is normally distributed. There is also looked at the spread of the residuals, which showed that there are three outliers which are number 5, 7 and 8 which can be observed in both plot.
 
 
 # Exercise 2
