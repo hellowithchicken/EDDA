@@ -159,7 +159,7 @@ Looking at the p-value of the one-way ANOVA test, we see that is not significant
 
 In a study on the effect of feedingstuffs on lactation a sample of nine cows were fed with two types of food, and their milk production was measured. All cows were fed both types of food, during two periods, with a neutral period in-between to try and wash out carry-over effects. The order of the types of food was randomized over the cows. The observed data can be found in the file cow.txt, where A and B refer to the types of feedingstuffs.
 
-***a)*** Test whether the type of feedingstuffs influences milk production using an ordinary "fixed effects" model, fitted with lm. Estimate the difference in milk production.
+**a)** Test whether the type of feedingstuffs influences milk production using an ordinary "fixed effects" model, fitted with lm. Estimate the difference in milk production.
 
 ```{r}
 # read data
@@ -168,11 +168,11 @@ data$treatment <- as.factor(data$treatment); data$order <- as.factor(data$order)
 data$id <- as.factor(data$id); data$per <- as.factor(data$per)
 
 # perform fixed effects model analysis
-fixed_aov <- lm(milk ~ order + id + per + treatment, data = data)
+fixed_aov <- lm(milk ~ id + per + treatment, data = data)
 summary(fixed_aov)
 ```
 
-***b)***
+**b)**
 ```{r warning=FALSE}
 attach(data)
 mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE)
@@ -180,7 +180,7 @@ mixed_avo_1 <- lmer(milk ~ order + per + (1|id),REML=FALSE)
 anova(mixed_avo_1, mixed_avo)
 ```
 
-***c)***
+**c**
 ```{r, warning=FALSE}
 attach(data)
 t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
