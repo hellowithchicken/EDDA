@@ -105,31 +105,35 @@ A researcher is interested in the time it takes a student to find a certain prod
 **a)** Number the selected students 1 to 15 and show how (by using R) the students could be randomized to the interfaces in a randomized block design.
 
 ```{r}
-data_search <- read.table(file="data/search.txt",header=TRUE)
-
-interface <- factor(rep(c("1","2","3"),each = 5))
-skill <- factor(rep(c("1","2","3","4","5"),times = 3))
+interface <- factor(rep(c(1,2,3),each = 5))
+skill <- factor(rep(c(1,2,3,4,5),times = 3))
 students <- c(1:15)
-block <- data.frame(students,skill,interface)
+block <- data.frame(students,skill,interface); block
 
-block
-
+# REMARK: Do i need to include skill, since only interfaces is mentioned. And perhaps use a random sample instead of just dividing?
 ```
 
 **b)** Test the null hypothesis that the search time is the same for all interfaces. What type of interface does require the longest search time? For which combination of skill level and type of interface is the search time the shortest? Estimate the time it takes a typical user of skill level 3 to find the product on the website if the website uses interface 3.
 
 ```{r}
-attach(data_search)
-aovsearch = lm(time~interface+skill)
-anova(aovsearch)
+data_search <- read.table(file="data/search.txt",header=TRUE)
+data_search$skill <- as.factor(data_search$skill)
+data_search$interface <- as.factor(data_search$interface)
+
+aovsearch = lm(time~interface+skill, data= data_search)
+
+anova(aovsearch) # The p-value for the interfaces is not significant >0.05 and therefore search time of 2 and 3 is not the same as 1.
+
+summary(aovsearch) 
 
 boxplot(time~interface) # Interface 3 has the longest search time
+ # Skill 2 and interface 1 is the fastest
 
-interaction.plot(skill,interface,time) # Skill 2 and interface 1 is the fastest
+# Estimate interface 3 = 4.46, skill 3 = 3.03, so 3-3 gives:
+(4.46+3.03)/2 # 3.75 seconds ???? Still vague how this works
 
-summary(aovsearch) # Estimate interface 3 = 4.46, skill 3 = 3.03, so 3-3 gives:
 
-(4.46+3.03)/2 # 3.75 seconds ????
+summary(my_life)
 
 ```
 
@@ -137,23 +141,30 @@ summary(aovsearch) # Estimate interface 3 = 4.46, skill 3 = 3.03, so 3-3 gives:
 
 ```{r}
 par(mfrow=c(1,2))
-qqnorm(residuals(aovsearch))
-plot(fitted(aovsearch),residuals(aovsearch))
+# qqnorm(residuals(aovsearch))
+# plot(fitted(aovsearch),residuals(aovsearch))
+plot(aovsearch,2)
+plot(aovsearch,1)
 ```
 
 **d)** Perform the Friedman test tot test whether there is an effect of interface.
 
 ```{r}
-friedman.test(time,interface,skill)
+interaction.plot(interface,skill,time) # Parallel lines indicate no significant interaction effect (slide 6.6)
+friedman.test(time,interface,skill) # P-value is significant thus H0 is not rejected and therefore there is no effect of the interface
 ```
 
 **e)**Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
 
 ```{r}
-attach(data_search)
+aovsearch = lm(data_search$time~data_search$interface)
+anova(aovsearch) 
+# is it not useless also to ignore skill since the time is clearly also depended on this variable, you can not simply ignore such a variable right?
 
-aovsearch = lm(time~interface)
-anova(aovsearch)
+# While only looking at interface with I/degrees = 2, you can also just perform a t.test, no????
+
+t.test(data_search$time,as.numeric(data_search$interface))
+
 ```
 
 
