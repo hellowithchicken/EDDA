@@ -71,7 +71,7 @@ To see if the Hypotheses can be rejected we want to look at the probability that
 
 We see that the humidity has a p-value of 4.3e-06, environment a p-value of 2.5e-10 and the interaction between the two (humidity:environment) shows a p-value of 3.7e-07. This means that humidity, environment and the interaction effect between humidity and environment have a significant influence on the hours, which means we can reject $H_{A}$, $H_{B}$ and $H_{AB}$.
 
-The interaction effect looks at the difference of differences, for example: it looks at the difference in hours for environment = cold and environment = warm for humidity = wet. Then it looks the difference between environment = cold and environment = warm for humidity = dry. It then looks at the difference betwen those differences and when this difference is high it shows that there is indeed interaction.
+The interaction effect looks at the difference of differences, for example: it looks at the difference in hours for environment = cold and environment = warm for humidity = wet. Then it looks the difference between environment = cold and environment = warm for humidity = dry. It then looks at the difference between those differences and when this difference is high it shows that there is indeed interaction.
 
 **d)** Which of the two factors has the greatest (numerical) influence on the decay?  Is this a good question?
 
@@ -165,6 +165,37 @@ anova(aovsearch)
 
 t.test(data_search$time,as.numeric(data_search$interface))
 
+```
+
+# Excercise 3
+
+In a study on the effect of feedingstuffs on lactation a sample of nine cows were fed with two types of food, and their milk production was measured. All cows were fed both types of food, during two periods, with a neutral period in-between to try and wash out carry-over effects. The order of the types of food was randomized over the cows. The observed data can be found in the file cow.txt, where A and B refer to the types of feedingstuffs.
+
+***a)*** Test whether the type of feedingstuffs influences milk production using an ordinary "fixed effects" model, fitted with lm. Estimate the difference in milk production.
+
+```{r}
+# read data
+data <- read.table(file="data/cow.txt",header=TRUE)
+data$treatment <- as.factor(data$treatment); data$order <- as.factor(data$order)
+data$id <- as.factor(data$id); data$per <- as.factor(data$per)
+
+# perform fixed effects model analysis
+fixed_aov <- lm(milk ~ order + id + per + treatment, data = data)
+summary(fixed_aov)
+```
+
+***b)***
+```{r warning=FALSE}
+attach(data)
+mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE)
+mixed_avo_1 <- lmer(milk ~ order + per + (1|id),REML=FALSE)
+anova(mixed_avo_1, mixed_avo)
+```
+
+***c)***
+```{r, warning=FALSE}
+attach(data)
+t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
 ```
 
 
