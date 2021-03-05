@@ -25,36 +25,32 @@ Moldy bread If left alone bread will become moldy, rot or decay otherwise.  To i
 
 **a)**The 18 slices came from a single loaf, but were randomized to the 6 combinations of conditions.  Present an R-code for this randomization process.
 ```{r}
-data <- read.table(file="data/bread.txt",header=TRUE)
-I=3; J=2; N=3
-env = rep(c("cold","intermediate","warm"), each=N*J)
-hum = rep(c("dry", "wet"),each = N*I)
-cbind(env, hum, sample(1:(N*I*J)))
+data_bread <- read.table(file="data/bread.txt",header=TRUE)
+
+humidity <- factor(rep(c("dry","wet"),each = 9))
+temperature <- factor(rep(c("cold", "intermediate","warm"),times = 6))
+
+data.frame(humidity,temperature,slices = sample(1:18))
 ```
 
 **b)**Make two boxplots of hours versus the two factors and two interaction plots (keeping the two factors fixed in turn).
-```{r}
+```{r, fig.width = 12, fig.height=6}
 par(mfrow=c(1,2))
-attach(data)
-boxplot(hours~environment)
-boxplot(hours~humidity)
-interaction.plot(humidity,environment,hours)
-interaction.plot(environment,humidity,hours)
-
+boxplot(data_bread$hours~data_bread$environment)
+boxplot(data_bread$hours~data_bread$humidity)
+interaction.plot(data_bread$humidity,data_bread$environment,data_bread$hours)
+interaction.plot(data_bread$environment,data_bread$humidity,data_bread$hours)
 ```
 
 
-**c)**Perform  an  analysis  of  variance  to  test  for  effect  of  the  factors temperature,humidity,  and  the interaction.  Describe the interaction effect in words.
+**c)**Perform  an  analysis  of  variance  to  test  for  effect  of  the  factors temperature, humidity, and the interaction. Describe the interaction effect in words.
 ```{r}
-
-data$environment=as.factor(data$environment)
-data$humidity=as.factor(data$humidity)
-dataaov=lm(hours~humidity*environment)
+data_bread$environment=as.factor(data_bread$environment)
+data_bread$humidity=as.factor(data_bread$humidity)
+dataaov=lm(data_bread$hours~data_bread$humidity*data_bread$environment)
 anova(dataaov)
 
 summary(dataaov)
-
-
 
 ```
 When looking at the two-way anova model we see that it consists of the following terms: Y_{ijk} = $\mu_{ij}$ + e_{ijk} = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
@@ -78,9 +74,9 @@ The interaction effect looks at the difference of differences, for example: it l
 
 ```{r}
 # Without interaction
-data$humidity=as.factor(data$humidity)
-data$environment=as.factor(data$environment)
-dataaov=lm(hours~humidity+environment,data=data)
+data_bread$humidity=as.factor(data_bread$humidity)
+data_bread$environment=as.factor(data_bread$environment)
+dataaov=lm(hours~humidity+environment,data=data_bread)
 anova(dataaov)
 ```
 
@@ -91,7 +87,7 @@ When we want to know which factor has the greatest influence we want to use the 
 
 ```{r}
 par(mfrow=c(1,2))
-dataaov2=lm(hours~humidity*environment,data=data); 
+dataaov2=lm(data_bread$hours~data_bread$humidity*data_bread$environment,data=data_bread); 
 shapiro.test(residuals(dataaov2))
 plot(dataaov2, 1)
 plot(dataaov2, 2)

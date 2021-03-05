@@ -24,11 +24,14 @@ Moldy bread If left alone bread will become moldy, rot or decay otherwise. To in
 **a)** The 18 slices came from a single loaf, but were randomized to the 6 combinations of conditions. Present an R-code for this randomization process.
 
 ```{r}
-data_bread <- read.table(file="data/bread.txt",header=TRUE)
 humid <- c("dry","wet")
 temp <- c("cold", "intermediate","warm")
 
-combination <- data.frame(cbind(c(humid,humid,humid),c(temp,temp)))
+humidity <- factor(rep(c("dry","wet"),each = 9))
+temperature <- factor(rep(c("cold", "intermediate","warm"),times = 6))
+
+
+combination <- data.frame(humidity,temperature,slices = sample(1:18))
 combination
 ```
 
