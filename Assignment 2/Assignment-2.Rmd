@@ -169,9 +169,9 @@ data$id <- as.factor(data$id); data$per <- as.factor(data$per)
 
 # perform fixed effects model analysis
 fixed_aov <- lm(milk ~ id + per + treatment, data = data)
-summary(fixed_aov)
+anova(fixed_aov)
 ```
-
+From the results of fixed effects model above we see that the p-value for treatment is > 0.05, therefore we can not conclude that there is a significant effect of the treatment.
 **b)**
 ```{r warning=FALSE}
 attach(data)
@@ -179,11 +179,10 @@ mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE)
 mixed_avo_1 <- lmer(milk ~ order + per + (1|id),REML=FALSE)
 anova(mixed_avo_1, mixed_avo)
 ```
-
+The code above performed an ANOVA test between the random effect model with and without treatment in it. From the p-value of >0.05 we can not say that there is significant difference between the two models, therefore there is no significant effect of the treatment.
 **c**
 ```{r, warning=FALSE}
-attach(data)
-t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
+t.test(milk[treatment=="A"],milk[treatment=="B"], paired=TRUE)
 ```
 
 
