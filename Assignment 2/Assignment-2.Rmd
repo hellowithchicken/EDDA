@@ -20,7 +20,7 @@ options(digits = 3)
 
 
 # Exercise 1
-Moldy bread If left alone bread will become moldy, rot or decay otherwise.  To investigate the influence of temperature and  humidity  on  this  process,  the  time  to  decay  was  measured  for  18  slices  of  white  bread,  which  were placed in 3 different environments and humidified or not.  The data are given in the file bread.txt, with the first column time to decay in hours, the second column the environment (cold, warm or intermediate temperature) and the third column the humidity.
+If left alone bread will become moldy, rot or decay otherwise.  To investigate the influence of temperature and  humidity  on  this  process,  the  time  to  decay  was  measured  for  18  slices  of  white  bread,  which  were placed in 3 different environments and humidified or not.  The data are given in the file bread.txt, with the first column time to decay in hours, the second column the environment (cold, warm or intermediate temperature) and the third column the humidity.
 
 
 **a)**The 18 slices came from a single loaf, but were randomized to the 6 combinations of conditions.  Present an R-code for this randomization process.
@@ -45,9 +45,10 @@ interaction.plot(data_bread$environment,data_bread$humidity,data_bread$hours)
 
 **c)**Perform  an  analysis  of  variance  to  test  for  effect  of  the  factors temperature, humidity, and the interaction. Describe the interaction effect in words.
 ```{r}
-data_bread$environment=as.factor(data_bread$environment)
-data_bread$humidity=as.factor(data_bread$humidity)
-dataaov=lm(data_bread$hours~data_bread$humidity*data_bread$environment)
+attach(data_bread)
+environment=as.factor(environment)
+humidity=as.factor(humidity)
+dataaov=lm(hours~humidity*environment,data=data_bread)
 anova(dataaov)
 
 summary(dataaov)
@@ -74,9 +75,9 @@ The interaction effect looks at the difference of differences, for example: it l
 
 ```{r}
 # Without interaction
-data_bread$humidity=as.factor(data_bread$humidity)
-data_bread$environment=as.factor(data_bread$environment)
-dataaov=lm(hours~humidity+environment,data=data_bread)
+humidity=as.factor(humidity)
+environment=as.factor(environment)
+dataaov=lm(hours~humidity+environment)
 anova(dataaov)
 ```
 
@@ -87,7 +88,7 @@ When we want to know which factor has the greatest influence we want to use the 
 
 ```{r}
 par(mfrow=c(1,2))
-dataaov2=lm(data_bread$hours~data_bread$humidity*data_bread$environment,data=data_bread); 
+dataaov2=lm(hours~humidity*environment,data=data_bread); 
 shapiro.test(residuals(dataaov2))
 plot(dataaov2, 1)
 plot(dataaov2, 2)
