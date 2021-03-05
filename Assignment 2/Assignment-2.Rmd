@@ -10,6 +10,7 @@ output:
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(rstudioapi)
+library(lme4)
 
 knitr::opts_chunk$set(echo = TRUE)
 setwd(dirname(getActiveDocumentContext()$path))
@@ -239,7 +240,7 @@ par(mfrow=c(1,6))
 for (i in c(2,3,4, 5, 6, 7)) hist(data_crime[,i],main=names(data_crime)[i])
 regression_data = data_crime[2:7]
 
-ar(mfrow=c(1,1))
+par(mfrow=c(1,1))
 potentiallm = lm(expend~bad, data = regression_data)
 potentiallm
 round(cooks.distance(potentiallm),2)
@@ -302,7 +303,7 @@ summary(lm(expend~employ+pop, data=regression_data))
 summary(lm(expend~employ+lawyers, data=regression_data)) #0.9631 ==> only significant model
 
 
-expend = -1.146e+02 + 2.690e-02*lawyers + 2.976e-02*employ  + error
+# expend = -1.146e+02 + 2.690e-02*lawyers + 2.976e-02*employ  + error
 # Step-down
 
 summary(lm(expend~bad+crime+lawyers+employ + pop, data=regression_data))
