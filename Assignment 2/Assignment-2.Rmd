@@ -169,21 +169,22 @@ data$id <- as.factor(data$id); data$per <- as.factor(data$per)
 
 # perform fixed effects model analysis
 fixed_aov <- lm(milk ~ id + per + treatment, data = data)
-summary(fixed_aov)
+anova(fixed_aov)
 ```
+From the results of fixed effects model above we see that the p-value for treatment is > 0.05, therefore we can not conclude that there is a significant effect of the treatment.
 
-**b)**
+**b)** Repeat a) and b) by performing a mixed effects analysis, modelling the cow effect as a random effect (use the function lmer). Compare your results to the results found by using a mixed effects model.
 ```{r, warning=FALSE}
 attach(data)
 mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE)
 mixed_avo_1 <- lmer(milk ~ order + per + (1|id),REML=FALSE)
 anova(mixed_avo_1, mixed_avo)
 ```
+The code above performed an ANOVA test between the random effect model with and without treatment in it. From the p-value of >0.05 we can not say that there is significant difference between the two models, therefore there is no significant effect of the treatment.
 
-**c)**
+**c** Study the commands:
 ```{r, warning=FALSE}
-attach(data)
-t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
+t.test(milk[treatment=="A"],milk[treatment=="B"], paired=TRUE)
 ```
 
 
@@ -191,8 +192,7 @@ t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
 
 Stochastic models for word counts are used in quantitative studies on literary styles.  Statistical analysis of the counts can, for example, be used to solve controversies about true author ships.  Another example is the analysis of word frequencies in relation to Jane Austen’s novel Sanditon.  At the time Austen died, this novel was only partly completed.  Austen, however, had made a summary for the remaining part.  An admirer of Austen’s work finished the novel, imitating Austen’s style as much as possible.  The file austen.txt contains counts of different words in some of Austen’s novels:  chapters 1 and 3 of Sense and Sensibility (stored in the Sense column), chapters 1, 2 and 3 of Emma (column Emma), chapters 1 and 6 of Sanditon (both written by Austen herself, column Sand1) and chapters 12 and 24 of Sanditon (both written by the admirer,Sand2)
 
-**a)**
-Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
+**a)** Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
 
 The contingency table test for homogeneity is appropriate because we want to know if the fan writer imitates Austen in a good way. This means that we want to test whether or not the different columns of data in the table come from the same population (writer) or not, which would be the case it the fan imitated Austen correctly. The H0 of the contingency table test for homogeneity states that the distribution of the words is the same for the stories.
 

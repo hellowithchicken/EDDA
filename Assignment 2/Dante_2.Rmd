@@ -150,7 +150,7 @@ In a study on the effect of feedingstuffs on lactation a sample of nine cows wer
 ```{r}
 data_cow <- read.table(file="data/cow.txt",header=TRUE)
 
-aovcow <- lm(data_cow$milk~factor(data_cow$treatment)+factor(data_cow$order)+data_cow$id)
+aovcow <- lm(data_cow$milk~data_cow$per+factor(data_cow$order)+data_cow$id+factor(data_cow$treatment))
 anova(aovcow)
 
 summary(aovcow)
