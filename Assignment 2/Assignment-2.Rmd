@@ -222,44 +222,40 @@ The data in expenses crime.txt were obtained to determine factors related to sta
 **a)** Make some graphical summaries of the data. Investigate the problem of potential and influence points,and the problem of collinearity.
 ```{r}
 data_crime = read.table(file="data/expensescrime.txt",header=TRUE)
-
 regression_data = data_crime[2:7]
 pairs(regression_data)
 
-par(mfrow=c(1,1))
-potentiallm = lm(expend~bad, data = regression_data)
-# potentiallm
-# round(cooks.distance(potentiallm),2)
-plot(cooks.distance(potentiallm), type="b")
+par(mfrow=c(2,3))
+plot(data_crime$expend,data_crime$crime)
+plot(data_crime$expend,data_crime$bad)
+plot(data_crime$expend,data_crime$lawyers)
+plot(data_crime$expend,data_crime$employ)
+plot(data_crime$expend,data_crime$pop)
+```
 
-potentiallm = lm(expend~crime, data = regression_data)
-# potentiallm
-# round(cooks.distance(potentiallm),2)
-plot(cooks.distance(potentiallm), type="b")
+```{r}
+par(mfrow=c(2,3))
+cooks_crime = cooks.distance(lm(expend~crime, data = regression_data))
+plot(cooks_crime, type="b")
+cooks_bad = cooks.distance(lm(expend~bad, data = regression_data))
+plot(cooks_bad, type="b")
+cooks_lawyers = cooks.distance(lm(expend~lawyers, data = regression_data))
+plot(cooks_lawyers, type="b")
+cooks_employ = cooks.distance(lm(expend~employ, data = regression_data))
+plot(cooks_employ, type="b")
+cooks_pop = cooks.distance(lm(expend~pop, data = regression_data))
+plot(cooks_pop, type="b")
+```
+Looking at the above plots we can see that for the variables bad, lawyers, employ and pop there exist potential and influence points. This is shown through the peaks in the cooks distance plots with peaks going above 1. 
 
-potentiallm = lm(expend~lawyers, data = regression_data)
-# potentiallm
-# round(cooks.distance(potentiallm),2)
-plot(1:50,cooks.distance(potentiallm), type="b")
-
-potentiallm = lm(expend~employ, data = regression_data)
-# potentiallm
-# round(cooks.distance(potentiallm),2)
-plot(cooks.distance(potentiallm), type="b")
-
-potentiallm = lm(expend~pop, data = regression_data)
-# potentiallm
-# round(cooks.distance(potentiallm),2)
-plot(cooks.distance(potentiallm), type="b")
+```{r}
 
 # Collinearity
 round(cor(regression_data),2)
+```
+Looking at the collinearity table we see that employee and and lawyers are strongly correlated(0.97). Furthermore, we also see that employee and crime rate per 100000 are strongly correlated(0.87). Also for lawyers and crime rate per 100000 it shows that they are strongly correlated(0.83). Lastly we also see a correlation between pop and bad and pop and lawyers and pop and employ.
 
-# We see that employee and and lawyers are strongly correlated(0.97)
-# We see that employee and crime rate per 100000 are strongly correlated(0.87)
-# We see that lawyers and  crime rate per 100000 are strongly correlated(0.83)
-# We see a correlation betwen pop and bad and pop and lawyers and pop and employ
-
+```{r}
 regressionlm=lm(expend~bad+crime+lawyers+employ, data=regression_data)
 car::vif(regressionlm)
 # We see a value above 5 for lawyers and employees which means we need to take one out
