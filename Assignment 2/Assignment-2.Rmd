@@ -27,10 +27,10 @@ If left alone bread will become moldy, rot or decay otherwise.  To investigate t
 ```{r}
 data_bread <- read.table(file="data/bread.txt",header=TRUE)
 
-humidity <- factor(rep(c("dry","wet"),each = 9))
-temperature <- factor(rep(c("cold", "intermediate","warm"),times = 6))
+humid <- factor(rep(c("dry","wet"),each = 9))
+temp <- factor(rep(c("cold", "intermediate","warm"),times = 6))
 
-data.frame(humidity,temperature,slices = sample(1:18))
+data.frame(humid,temp,slices = sample(1:18))
 ```
 
 **b)**Make two boxplots of hours versus the two factors and two interaction plots (keeping the two factors fixed in turn).
@@ -54,7 +54,7 @@ anova(dataaov)
 summary(dataaov)
 
 ```
-When looking at the two-way anova model we see that it consists of the following terms: Y_{ijk} = $\mu_{ij}$ + e_{ijk} = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
+When looking at the two-way anova model we see that it consists of the following terms: $Y_{ijk}$ = $\mu_{ij}$ + $e_{ijk}$ = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
 
 In order to test the effect of the temperature,humidity,  and  the interaction we set up 3 hypotheses which are:
 $H_{AB}$: $\gamma_{ij}$ = 0 for every (i, j) (no interactions between factor A and B)
@@ -86,14 +86,13 @@ When we want to know which factor has the greatest influence we want to use the 
 
 **e)**  Check the model assumptions by using relevant diagnostic tools.  Are there any outliers?
 
-```{r}
+```{r, fig.width = 12, fig.height=6}
 par(mfrow=c(1,2))
 dataaov2=lm(hours~humidity*environment,data=data_bread); 
-shapiro.test(residuals(dataaov2))
 plot(dataaov2, 1)
 plot(dataaov2, 2)
 ```
-The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. Furthermore we used a Shapiro-Wilks test to see if the test can back this assumption. The Shapiro-Wils test showed a p-value of 0.2 which means that the data is normally distributed. There is also looked at the spread of the residuals, which showed that there are three outliers which are number 5, 7 and 8 which can be observed in both plot.
+The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. We also looked at the spread of the residuals, which showed that there are three outliers which are number 5, 7 and 8 which can be observed in both plot.
 
 
 # Exercise 2
@@ -107,8 +106,6 @@ interface <- factor(rep(c(1,2,3),each = 5))
 skill <- factor(rep(c(1,2,3,4,5),times = 3))
 students <- c(1:15)
 block <- data.frame(students,skill,interface); block
-
-# REMARK: Do i need to include skill, since only interfaces is mentioned. And perhaps use a random sample instead of just dividing?
 ```
 
 **b)** Test the null hypothesis that the search time is the same for all interfaces. What type of interface does require the longest search time? For which combination of skill level and type of interface is the search time the shortest? Estimate the time it takes a typical user of skill level 3 to find the product on the website if the website uses interface 3.
@@ -118,49 +115,45 @@ data_search <- read.table(file="data/search.txt",header=TRUE)
 data_search$skill <- as.factor(data_search$skill)
 data_search$interface <- as.factor(data_search$interface)
 
-aovsearch = lm(data_search$time~data_search$interface+data_search$skill, data= data_search)
+aovsearch = lm(time~interface+skill, data= data_search)
 
-anova(aovsearch) # The p-value for the interfaces is not significant >0.05 and therefore search time of 2 and 3 is not the same as 1.
+anova(aovsearch)
 
 summary(aovsearch) 
 
-boxplot(data_search$time~data_search$interface) # Interface 3 has the longest search time
- # Skill 2 and interface 1 is the fastest
-
-# Estimate interface 3 = 4.46, skill 3 = 3.03, so 3-3 gives:
-(4.46+3.03)/2 # 3.75 seconds ???? Still vague how this works
-
+# Estimate interface 3 and skill 3:
+Y = 15.01+4.46+3.03+1.8
+Y 
 ```
+Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface. Furthermore, the summary shows that interface three gives the highest alpha parameter value, making the time it takes for this interface the longest. For the shortest search time, interface 1 can be combined with skill levels 1,2 or 3 since all three have the lowest alpha parameter values without being significant. For the estimation of time it takes a typical user of skill level 3 using interface 3 we can calculate Y by summing the estimates and adding the error, giving a time of 24.3 units.
 
 **c)** Check the model assumptions by using relevant diagnostic tools.
 
-```{r}
+```{r, fig.width = 12, fig.height=6}
 par(mfrow=c(1,2))
-# qqnorm(residuals(aovsearch))
-# plot(fitted(aovsearch),residuals(aovsearch))
 plot(aovsearch,2)
 plot(aovsearch,1)
 ```
 
-**d)** Perform the Friedman test tot test whether there is an effect of interface.
+As shown in the above QQ-plot and the residuals-fitted plot there are some outliers that raises some doubt about the normality of the data.
+
+
+**d)** Perform the Friedman test to test whether there is an effect of interface.
 
 ```{r}
-interaction.plot(data_search$interface,data_search$skill,data_search$time) # Parallel lines indicate no significant interaction effect (slide 6.6)
-friedman.test(data_search$time,data_search$interface,data_search$skill) # P-value is significant thus H0 is not rejected and therefore there is no effect of the interface
+friedman.test(data_search$time, data_search$interface, data_search$skill)
 ```
+P-value is significant thus $H_0$ is not rejected and therefore there is a significant effect of the interface. 
 
-**e)**Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
+**e)** Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
 
 ```{r}
 aovsearch = lm(data_search$time~data_search$interface)
 anova(aovsearch) 
-# is it not useless also to ignore skill since the time is clearly also depended on this variable, you can not simply ignore such a variable right?
-
-# While only looking at interface with I/degrees = 2, you can also just perform a t.test, no????
-
-t.test(data_search$time,as.numeric(data_search$interface))
-
 ```
+is it not useless also to ignore skill since the time is clearly also depended on this variable, you can not simply ignore such a variable right?
+
+Looking at the p-value of the one-way ANOVA test, we see that is not significant. We could therefore conclude that the interfaces does not have a significant effect on the search time. However, since the data originates from a random block design, it is not correct to use this test since it leaves out important interactions.
 
 # Excercise 3
 
