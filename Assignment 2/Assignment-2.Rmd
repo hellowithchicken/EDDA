@@ -219,45 +219,41 @@ The fan is inconsistent as the p-value of the test is below 0.05. Therefore we h
 # Exercise 5
 The data in expenses crime.txt were obtained to determine factors related to state expenditures on criminal activities (courts, police, etc.)  The variables are: state (indicating the state in the USA), expend (state expenditures on criminal activities in $1000), bad(crime rate per 100000),crime (number of persons under criminal supervision), lawyers (number of lawyers in the state), employ(number of persons employed in the state) and pop (population of the state in 1000).  In the regression analysis, take expend as response variable and bad, crime, lawyers, employ and pop as explanatory variables.
 
-**a)** Make some graphical summaries of the data.  Investigate the problem of potential and influence points,and the problem of collinearity.
+**a)** Make some graphical summaries of the data. Investigate the problem of potential and influence points,and the problem of collinearity.
 ```{r}
 data_crime = read.table(file="data/expensescrime.txt",header=TRUE)
-data_crime
 
-plot(data_crime[,c(2,3,4, 5, 6, 7)]) 
-par(mfrow=c(1,6))
-for (i in c(2,3,4, 5, 6, 7)) hist(data_crime[,i],main=names(data_crime)[i])
 regression_data = data_crime[2:7]
+pairs(regression_data)
 
 par(mfrow=c(1,1))
 potentiallm = lm(expend~bad, data = regression_data)
-potentiallm
-round(cooks.distance(potentiallm),2)
+# potentiallm
+# round(cooks.distance(potentiallm),2)
 plot(cooks.distance(potentiallm), type="b")
 
 potentiallm = lm(expend~crime, data = regression_data)
-potentiallm
-round(cooks.distance(potentiallm),2)
+# potentiallm
+# round(cooks.distance(potentiallm),2)
 plot(cooks.distance(potentiallm), type="b")
 
 potentiallm = lm(expend~lawyers, data = regression_data)
-potentiallm
-round(cooks.distance(potentiallm),2)
+# potentiallm
+# round(cooks.distance(potentiallm),2)
 plot(1:50,cooks.distance(potentiallm), type="b")
 
 potentiallm = lm(expend~employ, data = regression_data)
-potentiallm
-round(cooks.distance(potentiallm),2)
+# potentiallm
+# round(cooks.distance(potentiallm),2)
 plot(cooks.distance(potentiallm), type="b")
 
 potentiallm = lm(expend~pop, data = regression_data)
-potentiallm
-round(cooks.distance(potentiallm),2)
+# potentiallm
+# round(cooks.distance(potentiallm),2)
 plot(cooks.distance(potentiallm), type="b")
 
 # Collinearity
 round(cor(regression_data),2)
-pairs(regression_data)
 
 # We see that employee and and lawyers are strongly correlated(0.97)
 # We see that employee and crime rate per 100000 are strongly correlated(0.87)
