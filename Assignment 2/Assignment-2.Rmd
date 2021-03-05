@@ -53,11 +53,7 @@ anova(dataaov)
 
 summary(dataaov)
 
-# Without interaction
-#data$humidity=as.factor(data$humidity)
-#data$environment=as.factor(data$environment)
-#dataaov=lm(hours~humidity+environment,data=data)
-#anova(dataaov)
+
 
 ```
 When looking at the two-way anova model we see that it consists of the following terms: Y_{ijk} = $\mu_{ij}$ + e_{ijk} = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
@@ -78,6 +74,14 @@ We see that the humidity has a p-value of 4.3e-06, environment a p-value of 2.5e
 The interaction effect looks at the difference of differences, for example: it looks at the difference in hours for environment = cold and environment = warm for humidity = wet. Then it looks the difference between environment = cold and environment = warm for humidity = dry. It then looks at the difference betwen those differences and when this difference is high it shows that there is indeed interaction.
 
 **d)** Which of the two factors has the greatest (numerical) influence on the decay?  Is this a good question?
+
+```{r}
+# Without interaction
+data$humidity=as.factor(data$humidity)
+data$environment=as.factor(data$environment)
+dataaov=lm(hours~humidity+environment,data=data)
+anova(dataaov)
+```
 
 When we want to know which factor has the greatest influence we want to use the additive model as used above. This shows a p-value of 0.026 for humidity and a p-value of 3.7e-05 for environemnt. This means that the environment has the greatest influence. 
 
@@ -182,3 +186,99 @@ residuals(z)
 ```
 The fan is inconsistent as the p-value of the test is below 0.05. Therefore we have to reject the H0 and accept that the distribution of the words in the stories are not the same. Because Austen herself did not have this inconsistency we can say that the inconsistency is caused by the fan writer. The main inconsistencies were for the words  "that" and "an". As can be seen in the residual tanle above.
 
+
+# Exercise 5
+The data in expenses crime.txt were obtained to determine factors related to state expenditures on criminal activities (courts, police, etc.)  The variables are:state(indicating the state in the USA),expend(state expenditures on criminal activities in$1000),bad(crime rate per 100000),crime(number of persons under criminal supervision),lawyers(number of lawyers in the state),employ(number of persons employed in the state) and pop(population of the state in 1000).  In the regression analysis,  take expend as response variable and bad,crime,lawyers,employ and pop as explanatory variables.
+
+**a)** Make some graphical summaries of the data.  Investigate the problem of potential and influence points,and the problem of collinearity.
+```{r}
+data=read.table(file="expensescrime.txt",header=TRUE)
+data
+
+plot(data[,c(2,3,4, 5, 6, 7)]) 
+par(mfrow=c(1,6))
+for (i in c(2,3,4, 5, 6, 7)) hist(data[,i],main=names(data)[i])
+regression_data = data[2:7]
+
+ar(mfrow=c(1,1))
+potentiallm = lm(expend~bad, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~crime, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~lawyers, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(1:50,cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~employ, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~pop, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+# Collinearity
+round(cor(regression_data),2)
+pairs(regression_data)
+
+# We see that employee and and lawyers are strongly correlated(0.97)
+# We see that employee and crime rate per 100000 are strongly correlated(0.87)
+# We see that lawyers and  crime rate per 100000 are strongly correlated(0.83)
+# We see a correlation betwen pop and bad and pop and lawyers and pop and employ
+
+regressionlm=lm(expend~bad+crime+lawyers+employ, data=regression_data)
+car::vif(regressionlm)
+# We see a value above 5 for lawyers and employees which means we need to take one out
+
+regressionlm=lm(expend~bad+crime+lawyers, data=regression_data)
+car::vif(regressionlm)
+
+# Now it looks good
+```
+**b)** Fit a linear regression model to the data.  Use both the step-up and the step-down method to find thebest model.  If step-up and step-down yield two different models, choose one and motivate your choice.
+```{r}
+
+# Step-up method
+
+summary(lm(expend~bad, data=regression_data)) #0.694
+summary(lm(expend~crime, data=regression_data)) #0.1
+summary(lm(expend~lawyers, data=regression_data)) #0.9369
+summary(lm(expend~employ, data=regression_data))#0.954
+summary(lm(expend~pop, data=regression_data)) # 0.907
+
+
+
+summary(lm(expend~employ+bad, data=regression_data)) 
+summary(lm(expend~employ+crime, data=regression_data)) 
+summary(lm(expend~employ+pop, data=regression_data))
+summary(lm(expend~employ+lawyers, data=regression_data)) #0.9631 ==> only significant model
+
+
+expend = -1.146e+02 + 2.690e-02*lawyers + 2.976e-02*employ  + error
+# Step-down
+
+summary(lm(expend~bad+crime+lawyers+employ + pop, data=regression_data))
+
+summary(lm(expend~lawyers+employ+bad + pop, data=regression_data))
+
+summary(lm(expend~lawyers+employ + bad, data=regression_data))
+
+summary(lm(expend~lawyers+employ , data=regression_data))
+```
+**c)** Check the model assumptions (of the resulting model from b)) by using relevant diagnostic tools.
+```{r}
+right_plot = lm(expend~lawyers+employ , data=regression_data)
+qqnorm(residuals(right_plot))
+plot(fitted(right_plot), residuals(right_plot))
+plot(right_plot, 1)
+plot(right_plot, 2)
+```

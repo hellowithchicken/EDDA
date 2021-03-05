@@ -79,7 +79,7 @@ data=read.table(file="cow.txt",header=TRUE)
 data
 data$id=factor(data$id)
 data$per=factor(data$per)
-datalm=lm(milk~treatment+per+id,data=data)
+datalm=lm(milk~per+id +treatment,data=data)
 anova(datalm)
 summary(datalm)
 # The Anova test does not show a significant difference for feeding stuffs
@@ -135,10 +135,98 @@ residuals(z)
 # Main inconcistency is that and an 
 
 # Exercise 5
+
+# Graphical summary
 data=read.table(file="expensescrime.txt",header=TRUE)
 data
 
 plot(data[,c(2,3,4, 5, 6, 7)]) 
-par(mfrow=c(1,3))
-for (i in c(2,3,4, 5, 6, 7)) hist(sat[,i],main=names(sat)[i])
-                                    
+par(mfrow=c(1,6))
+for (i in c(2,3,4, 5, 6, 7)) hist(data[,i],main=names(data)[i])
+regression_data = data[2:7]
+
+
+datalm=lm(expend~bad+crime+lawyers+employ+pop,data=data); summary(datalm)                 
+
+# Potential point
+par(mfrow=c(1,1))
+potentiallm = lm(expend~bad, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~crime, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~lawyers, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(1:50,cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~employ, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+potentiallm = lm(expend~pop, data = regression_data)
+potentiallm
+round(cooks.distance(potentiallm),2)
+plot(cooks.distance(potentiallm), type="b")
+
+# Collinearity
+round(cor(regression_data),2)
+pairs(regression_data)
+
+# We see that employee and and lawyers are strongly correlated(0.97)
+# We see that employee and crime rate per 100000 are strongly correlated(0.87)
+# We see that lawyers and  crime rate per 100000 are strongly correlated(0.83)
+# We see a correlation betwen pop and bad and pop and lawyers and pop and employ
+
+regressionlm=lm(expend~bad+crime+lawyers+employ, data=regression_data)
+car::vif(regressionlm)
+# We see a value above 5 for lawyers and employees which means we need to take one out
+
+regressionlm=lm(expend~bad+crime+lawyers, data=regression_data)
+car::vif(regressionlm)
+
+# Now it looks good
+
+
+# Step-up method
+
+summary(lm(expend~bad, data=regression_data)) #0.694
+summary(lm(expend~crime, data=regression_data)) #0.1
+summary(lm(expend~lawyers, data=regression_data)) #0.9369
+summary(lm(expend~employ, data=regression_data))#0.954
+summary(lm(expend~pop, data=regression_data)) # 0.907
+
+
+
+summary(lm(expend~employ+bad, data=regression_data)) 
+summary(lm(expend~employ+crime, data=regression_data)) 
+summary(lm(expend~employ+pop, data=regression_data))
+summary(lm(expend~employ+lawyers, data=regression_data)) #0.9631 ==> only significant model
+
+
+expend = -1.146e+02 + 2.690e-02*lawyers + 2.976e-02*employ  + error
+# Step-down
+
+summary(lm(expend~bad+crime+lawyers+employ + pop, data=regression_data))
+
+summary(lm(expend~lawyers+employ+bad + pop, data=regression_data))
+
+summary(lm(expend~lawyers+employ + bad, data=regression_data))
+
+summary(lm(expend~lawyers+employ , data=regression_data))
+
+
+# Diagnostic tools for normality
+
+
+plot(fitted(regressionlm), residuals(regressionlm))
+right_plot = lm(expend~lawyers+employ , data=regression_data)
+qqnorm(residuals(right_plot))
+plot(right_plot, 1)
+plot(right_plot, 2)
