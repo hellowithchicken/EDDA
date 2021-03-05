@@ -274,18 +274,19 @@ car::vif(regressionlm)
 
 # Step-up method
 
-summary(lm(expend~bad, data=regression_data)) #0.694
-summary(lm(expend~crime, data=regression_data)) #0.1
-summary(lm(expend~lawyers, data=regression_data)) #0.9369
-summary(lm(expend~employ, data=regression_data))#0.954
-summary(lm(expend~pop, data=regression_data)) # 0.907
+print("1st level:")
+paste("Bad:",round(summary(lm(expend~bad, data=regression_data))$r.squared, 3))
+paste("Crime: ", round(summary(lm(expend~crime, data=regression_data))$r.squared, 3))
+paste("Lawyers: ", round(summary(lm(expend~lawyers, data=regression_data))$r.squared, 3)) #0.9369
+paste("Employ: ", round(summary(lm(expend~employ, data=regression_data))$r.squared, 3), "- selected")#0.954
+paste("Pop: ", round(summary(lm(expend~pop, data=regression_data))$r.squared, 3)) # 0.907
 
 
-
-summary(lm(expend~employ+bad, data=regression_data)) 
-summary(lm(expend~employ+crime, data=regression_data)) 
-summary(lm(expend~employ+pop, data=regression_data))
-summary(lm(expend~employ+lawyers, data=regression_data)) #0.9631 ==> only significant model
+print("2nd level: employ +")
+paste("Bad:",round(summary(lm(expend~employ+bad, data=regression_data))$r.squared, 3))
+paste("Crime: ",round(summary(lm(expend~employ+crime, data=regression_data))$r.squared, 3))
+paste("Pop: ",round(summary(lm(expend~employ+pop, data=regression_data))$r.squared, 3))
+paste("Lawyers: ",round(summary(lm(expend~employ+lawyers, data=regression_data))$r.squared, 3), "- selected") #0.9631 ==> only significant model
 
 
 # expend = -1.146e+02 + 2.690e-02*lawyers + 2.976e-02*employ  + error
@@ -299,6 +300,13 @@ summary(lm(expend~lawyers+employ + bad, data=regression_data))
 
 summary(lm(expend~lawyers+employ , data=regression_data))
 ```
+
+Step up method:
+First we started by fitting a linear model with one explanatory variable. Out of the 5 available variables the employ performed the best according to r-squared value, therefore it was selected for further fitting. Next, another layer of explanatory variables were added to the linear model. Here, only adding Lawyers resulted in a model that had all significant parameters, therefore it was the final model that we chose.
+
+Step down method:
+
+
 **c)** Check the model assumptions (of the resulting model from b)) by using relevant diagnostic tools.
 ```{r}
 right_plot = lm(expend~lawyers+employ , data=regression_data)
