@@ -54,6 +54,7 @@ interaction.plot(humidity,environment,hours)
 ```{r}
 aov <- lm(hours ~ environment * humidity, data = data)
 anova(aov)
+summary(aov)
 ```
 
 From the above p-values we can conclude that:
