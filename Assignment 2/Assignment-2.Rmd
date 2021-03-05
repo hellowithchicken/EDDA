@@ -173,14 +173,14 @@ summary(fixed_aov)
 ```
 
 **b)**
-```{r warning=FALSE}
+```{r, warning=FALSE}
 attach(data)
 mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE)
 mixed_avo_1 <- lmer(milk ~ order + per + (1|id),REML=FALSE)
 anova(mixed_avo_1, mixed_avo)
 ```
 
-**c**
+**c)**
 ```{r, warning=FALSE}
 attach(data)
 t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
@@ -189,7 +189,7 @@ t.test(milk[treatment=="A"],milk[treatment=="B"],paired=TRUE)
 
 # Exercise 4
 
-Stochastic models for word counts are used in quantitative studies on literary styles.  Statistical analysis of the counts can, for example, be used to solve controversies about true author ships.  Another example is the analysis of word frequencies in relation to Jane Austen’s novel Sanditon.  At the time Austen died, this novel was only partly completed.  Austen, however, had made a summary for the remaining part.  An admirer of Austen’s work finished the novel, imitating Austen’s style as much as possible.  The file austen.txt contains counts of different words in some of Austen’s novels:  chapters 1 and 3 of Sense and Sensibility(stored in the Sense column), chapters 1, 2 and 3 of Emma(column Emma), chapters 1 and 6 of Sanditon(both written by Austen herself, column Sand1) and chapters 12 and 24 of Sanditon(both written by the admirer,Sand2)
+Stochastic models for word counts are used in quantitative studies on literary styles.  Statistical analysis of the counts can, for example, be used to solve controversies about true author ships.  Another example is the analysis of word frequencies in relation to Jane Austen’s novel Sanditon.  At the time Austen died, this novel was only partly completed.  Austen, however, had made a summary for the remaining part.  An admirer of Austen’s work finished the novel, imitating Austen’s style as much as possible.  The file austen.txt contains counts of different words in some of Austen’s novels:  chapters 1 and 3 of Sense and Sensibility (stored in the Sense column), chapters 1, 2 and 3 of Emma (column Emma), chapters 1 and 6 of Sanditon (both written by Austen herself, column Sand1) and chapters 12 and 24 of Sanditon (both written by the admirer,Sand2)
 
 **a)**
 Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
@@ -206,19 +206,18 @@ z
 residuals(z)
 ```
 
-She is not inconsistent as the p-value is above 0.05. This means that we cannot reject the H0. She does however have some main inconsistency, which where the words "a", "that" and "without". As can be seen in the residual tanle above.
+She is not inconsistent as the p-value is above 0.05. This means that we cannot reject the H0. She does however have some main inconsistency, which where the words "a", "that" and "without". As can be seen in the residual table above.
 
 ```{r}
 z = chisq.test(data)
 z
 residuals(z)
-
 ```
-The fan is inconsistent as the p-value of the test is below 0.05. Therefore we have to reject the H0 and accept that the distribution of the words in the stories are not the same. Because Austen herself did not have this inconsistency we can say that the inconsistency is caused by the fan writer. The main inconsistencies were for the words  "that" and "an". As can be seen in the residual tanle above.
+The fan is inconsistent as the p-value of the test is below 0.05. Therefore we have to reject the H0 and accept that the distribution of the words in the stories are not the same. Because Austen herself did not have this inconsistency we can say that the inconsistency is caused by the fan writer. The main inconsistencies were for the words "that" and "an". As can be seen in the residual table above.
 
 
 # Exercise 5
-The data in expenses crime.txt were obtained to determine factors related to state expenditures on criminal activities (courts, police, etc.)  The variables are:state(indicating the state in the USA),expend(state expenditures on criminal activities in$1000),bad(crime rate per 100000),crime(number of persons under criminal supervision),lawyers(number of lawyers in the state),employ(number of persons employed in the state) and pop(population of the state in 1000).  In the regression analysis,  take expend as response variable and bad,crime,lawyers,employ and pop as explanatory variables.
+The data in expenses crime.txt were obtained to determine factors related to state expenditures on criminal activities (courts, police, etc.)  The variables are: state (indicating the state in the USA), expend (state expenditures on criminal activities in $1000), bad(crime rate per 100000),crime (number of persons under criminal supervision), lawyers (number of lawyers in the state), employ(number of persons employed in the state) and pop (population of the state in 1000).  In the regression analysis, take expend as response variable and bad, crime, lawyers, employ and pop as explanatory variables.
 
 **a)** Make some graphical summaries of the data.  Investigate the problem of potential and influence points,and the problem of collinearity.
 ```{r}
