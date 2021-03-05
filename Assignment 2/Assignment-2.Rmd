@@ -120,20 +120,17 @@ data_search <- read.table(file="data/search.txt",header=TRUE)
 data_search$skill <- as.factor(data_search$skill)
 data_search$interface <- as.factor(data_search$interface)
 
-aovsearch = lm(time~interface+skill, data= data_search)
+aovsearch = lm(data_search$time~data_search$interface+data_search$skill, data= data_search)
 
 anova(aovsearch) # The p-value for the interfaces is not significant >0.05 and therefore search time of 2 and 3 is not the same as 1.
 
 summary(aovsearch) 
 
-boxplot(time~interface) # Interface 3 has the longest search time
+boxplot(data_search$time~data_search$interface) # Interface 3 has the longest search time
  # Skill 2 and interface 1 is the fastest
 
 # Estimate interface 3 = 4.46, skill 3 = 3.03, so 3-3 gives:
 (4.46+3.03)/2 # 3.75 seconds ???? Still vague how this works
-
-
-summary(my_life)
 
 ```
 
@@ -150,8 +147,8 @@ plot(aovsearch,1)
 **d)** Perform the Friedman test tot test whether there is an effect of interface.
 
 ```{r}
-interaction.plot(interface,skill,time) # Parallel lines indicate no significant interaction effect (slide 6.6)
-friedman.test(time,interface,skill) # P-value is significant thus H0 is not rejected and therefore there is no effect of the interface
+interaction.plot(data_search$interface,data_search$skill,data_search$time) # Parallel lines indicate no significant interaction effect (slide 6.6)
+friedman.test(data_search$time,data_search$interface,data_search$skill) # P-value is significant thus H0 is not rejected and therefore there is no effect of the interface
 ```
 
 **e)**Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
@@ -203,13 +200,13 @@ The data in expenses crime.txt were obtained to determine factors related to sta
 
 **a)** Make some graphical summaries of the data.  Investigate the problem of potential and influence points,and the problem of collinearity.
 ```{r}
-data=read.table(file="expensescrime.txt",header=TRUE)
-data
+data_crime = read.table(file="data/expensescrime.txt",header=TRUE)
+data_crime
 
-plot(data[,c(2,3,4, 5, 6, 7)]) 
+plot(data_crime[,c(2,3,4, 5, 6, 7)]) 
 par(mfrow=c(1,6))
-for (i in c(2,3,4, 5, 6, 7)) hist(data[,i],main=names(data)[i])
-regression_data = data[2:7]
+for (i in c(2,3,4, 5, 6, 7)) hist(data_crime[,i],main=names(data_crime)[i])
+regression_data = data_crime[2:7]
 
 ar(mfrow=c(1,1))
 potentiallm = lm(expend~bad, data = regression_data)
