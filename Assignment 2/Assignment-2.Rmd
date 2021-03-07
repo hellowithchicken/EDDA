@@ -143,7 +143,7 @@ As shown in the above QQ-plot and the residuals-fitted plot there are some outli
 ```{r}
 friedman.test(data_search$time, data_search$interface, data_search$skill)
 ```
-P-value is significant thus $H_0$ is not rejected and therefore there is a significant effect of the interface. 
+The test shows a p-value o 0.04 which is significant as it is lower than our $\alpha$-value of 0.05. This means that the $H_0$ can be rejected and we can state that there is a significant effect of the interface. 
 
 **e)** Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
 
