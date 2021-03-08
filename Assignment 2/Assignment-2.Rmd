@@ -88,7 +88,7 @@ The qqplot shows a somewhat linear line which means we can conclude that the dat
 ```{r}
 interface <- factor(rep(c(1,2,3),each = 5))
 skill <- factor(rep(c(1,2,3,4,5),times = 3))
-student <- c(1:15) # shouldn't we also sample the students here? or then sample those 15 combinations? whichever one, i do not think it matters
+student <- sample(c(1:15))
 knitr::kable(data.frame(student,skill,interface), caption = "Randomised block design")
 ```
 
@@ -102,7 +102,7 @@ data_search$interface <- as.factor(data_search$interface)
 aovsearch = lm(time~interface+skill, data= data_search);  anova(aovsearch); 
 summary(aovsearch)$coefficients 
 ```
-Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface (p-value < 0.05) - therefore, the search times are not the same between the interfaces. Furthermore, the summary shows that interface 3 gives the highest $\alpha$ parameter value, making search time the longest for this interface type. For the shortest search time, interface 1 can be combined with skill levels 1, 2 or 3 since all three have the lowest $\beta$ parameter values with 2 and 3 not being significantly different from skill level 1. 
+Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface (p-value < 0.05) - therefore, the search times are not the same between the interfaces. Furthermore, the summary shows that interface 3 gives the highest $\alpha$ parameter value, making search time the longest for this interface type. For the shortest search time, interface 1 can be combined with skill levels 1, 2 or 3 since all three have the lowest $\beta$ parameter values with 2 and 3 not being significantly different from skill level 1. If significance is disregarded, combination of interface 1 with skill level 1 would give the shortest search time.
 
 For the estimation of time it takes a typical user of skill level 3 using interface 3 we can calculate Y by summing the estimates and adding the error, giving a time of 23.97 units:
 ```{r}
