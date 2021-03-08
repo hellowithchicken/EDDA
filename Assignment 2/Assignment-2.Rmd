@@ -306,10 +306,18 @@ First we started by fitting a linear model with one explanatory variable. Out of
 # VIF analysis
 vif(model_pop_3)
 ```
-From the VIF analysis we see that indeed having these two parameters should be avoided as VIF for them is > 5. We removed $pop$ from the model even though it had lower VIF - removing $employ$ resulted in lower r-squared value. Removal of this variable did not have a high impact on the r-squared value as addition of it only brought marginal improvement. Therefore, the final model from the step-up method is as follows: 
+From the VIF analysis we see that indeed having these two parameters should be avoided as VIF for them is > 5. We removed $pop$ from the model even though it had lower VIF - removing $employ$ resulted in lower r-squared value. Removal of this variable did not have a high impact on the r-squared value as addition of it only brought marginal improvement. VIF of the model without $pop$ (as seen below) is now acceptable. 
 
 ```{r}
 # final model
+vif(model_crime_2)
+```
+
+Therefore, the final model from the step-up method is as follows: 
+
+```{r}
+# final model
+vif(model_crime_2)
 summary(model_crime_2)$coefficients
 ```
 

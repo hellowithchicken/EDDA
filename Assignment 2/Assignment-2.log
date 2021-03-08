@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2021.3.8)  8 MAR 2021 15:50
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2021.3.8)  8 MAR 2021 17:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -599,26 +599,27 @@ LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
 Overfull \vbox (11.92119pt too high) has occurred while \output is active []
 
 [13] [14] [15]
-<Assignment-2_files/figure-latex/unnamed-chunk-25-1.pdf, id=151, 867.24pt x 433
+<Assignment-2_files/figure-latex/unnamed-chunk-26-1.pdf, id=151, 867.24pt x 433
 .62pt>
-File: Assignment-2_files/figure-latex/unnamed-chunk-25-1.pdf Graphic file (type
+File: Assignment-2_files/figure-latex/unnamed-chunk-26-1.pdf Graphic file (type
  pdf)
-<use Assignment-2_files/figure-latex/unnamed-chunk-25-1.pdf>
-Package pdftex.def Info: Assignment-2_files/figure-latex/unnamed-chunk-25-1.pdf
-  used on input line 1157.
+<use Assignment-2_files/figure-latex/unnamed-chunk-26-1.pdf>
+Package pdftex.def Info: Assignment-2_files/figure-latex/unnamed-chunk-26-1.pdf
+  used on input line 1182.
 (pdftex.def)             Requested size: 469.75827pt x 234.87912pt.
+[16]
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-164.
+189.
 (/Users/IggyMac/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [16 <./Assignment-2_files/figure-latex/unnamed-chunk-25-1.pdf>] (./Assignment
+) [17 <./Assignment-2_files/figure-latex/unnamed-chunk-26-1.pdf>] (./Assignment
 -2.aux)
 Package rerunfilecheck Info: File `Assignment-2.out' has not changed.
 (rerunfilecheck)             Checksum: E7078B50A46104F2A8EEEB06130E10ED;490.
  ) 
 Here is how much of TeX's memory you used:
- 11117 strings out of 480971
- 162291 string characters out of 5906950
+ 11118 strings out of 480971
+ 162298 string characters out of 5906950
  479398 words of memory out of 5000000
  28088 multiletter control sequences out of 15000+600000
  451921 words of font info for 71 fonts, out of 8000000 for 9000
@@ -643,10 +644,10 @@ c/lm/lmsy10.pfb></Users/IggyMac/Library/TinyTeX/texmf-dist/fonts/type1/public/l
 m/lmtk10.pfb></Users/IggyMac/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/l
 mtt10.pfb></Users/IggyMac/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt
 i10.pfb>
-Output written on Assignment-2.pdf (16 pages, 414180 bytes).
+Output written on Assignment-2.pdf (17 pages, 414716 bytes).
 PDF statistics:
- 226 PDF objects out of 1000 (max. 8388607)
- 178 compressed objects within 2 object streams
- 33 named destinations out of 1000 (max. 500000)
+ 230 PDF objects out of 1000 (max. 8388607)
+ 181 compressed objects within 2 object streams
+ 34 named destinations out of 1000 (max. 500000)
  76 words of extra memory for PDF output out of 10000 (max. 10000000)
 
