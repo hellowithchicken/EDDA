@@ -84,7 +84,7 @@ dataaov2=lm(hours~humidity*environment,data=data_bread);
 plot(dataaov2, 1)
 plot(dataaov2, 2)
 ```
-The qqplot shows a somewhat linear line which means we can conclude that the data is normally distributed - however, there are some outliers at the extremes marked with 5, 7 and 8. We also looked at the Residuals vs Fitter plot, which showed no obvious relationship - which is an acceptable behavior.
+The qqplot shows a somewhat linear line which means we can conclude that the data is normally distributed - however, there are some outliers at the extremes marked with 5, 7 and 8. We also looked at the Residuals vs Fitted plot, which showed no obvious relationship - which is an acceptable behavior.
 
 # Exercise 2
 
@@ -109,13 +109,15 @@ data_search$interface <- as.factor(data_search$interface)
 aovsearch = lm(time~interface+skill, data= data_search);  anova(aovsearch); 
 summary(aovsearch)$coefficients 
 ```
-Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface (p-value < 0.05) - therefore, the search times are not the same between the interfaces. Furthermore, the summary shows that interface 3 gives the highest $\alpha$ parameter value, making search time the longest for this interface type. For the shortest search time, interface 1 can be combined with skill levels 1, 2 or 3 since all three have the lowest $\alpha$ parameter values with 2 and 3 not being significant different from skill level 1. 
+Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface (p-value < 0.05) - therefore, the search times are not the same between the interfaces. Furthermore, the summary shows that interface 3 gives the highest $\alpha$ parameter value, making search time the longest for this interface type. For the shortest search time, interface 1 can be combined with skill levels 1, 2 or 3 since all three have the lowest $\beta$ parameter values with 2 and 3 not being significantly different from skill level 1. 
 
 For the estimation of time it takes a typical user of skill level 3 using interface 3 we can calculate Y by summing the estimates and adding the error, giving a time of 23.97 units:
 ```{r}
 # Estimate interface 3 and skill 3:
 options(digits=10)
 Y = 15.01+4.46+3.03+1.47; Y
+```
+````{r, echo= FALSE}
 options(digits=3)
 ```
 
@@ -125,7 +127,7 @@ options(digits=3)
 par(mfrow=c(1,2)); plot(aovsearch,2); plot(aovsearch,1)
 ```
 
-As shown in the above QQ-plot and the residuals-fitted plot there are some outliers (points 2, 6, 14) that raise doubt about the normality of the data. There seems to be some relationship visible, albeit small, in the Residuals vs Fitted plot - it would be a good idea to perform and extra test suitable for non-normal data.
+As shown in the above QQ-plot and the residuals-fitted plot there are some outliers (points 2, 6, 14) that raise doubt about the normality of the data. There seems to be some relationship visible, albeit small, in the Residuals vs Fitted plot - it would be a good idea to perform an extra test suitable for non-normal data.
 
 **d)** Perform the Friedman test to test whether there is an effect of interface.
 
@@ -173,7 +175,7 @@ The code above implemented the correct model that modeled the cows as "random ef
 ```{r, warning=FALSE}
 t.test(milk[treatment=="A"],milk[treatment=="B"], paired=TRUE)$p.value
 ```
-The code above performed a paired t-test (same treatment was done on the same cow) to test whether the means of the two populations are significantly different. Here, we see that p-value is > 0.05, which brings us to the same conclusion as with a) and b). However, this is not correct as we can see from the previous analysis that the order had a significant effect on the experimental outcomes - a factor this t-test omits. This t-test is the same as performing a two-way ANOVA of treament + id. We can see that the p-value is the same:
+The code above performed a paired t-test (different treatment was done on the same cow) to test whether the means of the two populations are significantly different. Here, we see that p-value is > 0.05, which brings us to the same conclusion as with a) and b). However, this is not correct as we can see from the previous analysis that the order had a significant effect on the experimental outcomes - a factor this t-test omits. This t-test is the same as performing a two-way ANOVA of treament + id. We can see that the p-value is the same:
 ```{r, warning=FALSE}
 paste("p-value with two-way ANOVA:", 
       round(anova(lm(milk ~ treatment + id, data = data))["treatment", ]$`Pr(>F)`, 3))
@@ -306,7 +308,7 @@ First we started by fitting a linear model with one explanatory variable. Out of
 # VIF analysis
 vif(model_pop_3)
 ```
-From the VIF analysis we see that indeed having these two parameters should be avoided as VIF for them is > 5. We removed $pop$ from the model even though it had lower VIF - removing $employ$ resulted in lower r-squared value. Removal of this variable did not have a high impact on the r-squared value as addition of it only brought marginal improvement. VIF of the model without $pop$ (as seen below) is now acceptable. 
+From the VIF analysis we see that indeed having these two parameters should be avoided as VIF for them is > 5. We removed $pop$ from the model even though it had lower VIF - removing $employ$ resulted in lower r-squared value. Removal of this variable did not have a high impact on the r-squared value as addition of it only brought marginal improvement. VIF of the model without $pop$ (as seen below) is now acceptable: 
 
 ```{r}
 # final model
