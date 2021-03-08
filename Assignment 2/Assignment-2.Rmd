@@ -26,11 +26,9 @@ If left alone bread will become moldy, rot or decay otherwise.  To investigate t
 **a)**The 18 slices came from a single loaf, but were randomized to the 6 combinations of conditions.  Present an R-code for this randomization process.
 ```{r}
 data_bread <- read.table(file="data/bread.txt",header=TRUE)
-
 humid <- factor(rep(c("dry","wet"),each = 9))
 temp <- factor(rep(c("cold", "intermediate","warm"),times = 6))
-
-data.frame(humid,temp,slices = sample(1:18))
+knitr::kable(data.frame(humid,temp,slice = sample(1:18)))
 ```
 
 **b)**Make two boxplots of hours versus the two factors and two interaction plots (keeping the two factors fixed in turn).
@@ -51,7 +49,7 @@ humidity=as.factor(humidity)
 dataaov=lm(hours~humidity*environment,data=data_bread)
 anova(dataaov)
 
-summary(dataaov)
+summary(dataaov)$coefficients
 
 ```
 When looking at the two-way anova model we see that it consists of the following terms: $Y_{ijk}$ = $\mu_{ij}$ + $e_{ijk}$ = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
@@ -69,7 +67,7 @@ To see if the Hypotheses can be rejected we want to look at the probability that
 
 We see that the humidity has a p-value of 4.3e-06, environment a p-value of 2.5e-10 and the interaction between the two (humidity:environment) shows a p-value of 3.7e-07. This means that humidity, environment and the interaction effect between humidity and environment have a significant influence on the hours, which means we can reject $H_{A}$, $H_{B}$ and $H_{AB}$.
 
-The interaction effect looks at the difference of differences, for example: it looks at the difference in hours for environment = cold and environment = warm for humidity = wet. Then it looks the difference between environment = cold and environment = warm for humidity = dry. It then looks at the difference between those differences and when this difference is high it shows that there is indeed interaction.
+The interaction effect looks at the difference of differences, for example: it looks at the difference in hours for environment = cold and environment = warm for humidity = wet. Then it looks at the difference between environment = cold and environment = warm for humidity = dry. It then looks at the difference between those differences and when this difference is high it shows that there is indeed interaction.
 
 **d)** Which of the two factors has the greatest (numerical) influence on the decay?  Is this a good question?
 
@@ -82,7 +80,6 @@ anova(dataaov)
 ```
 
 When we want to know which factor has the greatest influence we want to use the additive model as used above. This shows a p-value of 0.026 for humidity and a p-value of 3.7e-05 for environemnt. This means that the environment has the greatest influence. 
-
 
 **e)**  Check the model assumptions by using relevant diagnostic tools.  Are there any outliers?
 
@@ -104,8 +101,8 @@ A researcher is interested in the time it takes a student to find a certain prod
 ```{r}
 interface <- factor(rep(c(1,2,3),each = 5))
 skill <- factor(rep(c(1,2,3,4,5),times = 3))
-students <- c(1:15)
-block <- data.frame(students,skill,interface); block
+student <- c(1:15) # shouldn't we also sample the students here? or then sample those 15 combinations? whichever one, i do not think it matters
+knitr::kable(data.frame(student,skill,interface))
 ```
 
 **b)** Test the null hypothesis that the search time is the same for all interfaces. What type of interface does require the longest search time? For which combination of skill level and type of interface is the search time the shortest? Estimate the time it takes a typical user of skill level 3 to find the product on the website if the website uses interface 3.
@@ -114,18 +111,17 @@ block <- data.frame(students,skill,interface); block
 data_search <- read.table(file="data/search.txt",header=TRUE)
 data_search$skill <- as.factor(data_search$skill)
 data_search$interface <- as.factor(data_search$interface)
-
-aovsearch = lm(time~interface+skill, data= data_search)
-
-anova(aovsearch)
-
-summary(aovsearch) 
-
-# Estimate interface 3 and skill 3:
-Y = 15.01+4.46+3.03+1.8
-Y 
+# perform ANOVA
+aovsearch = lm(time~interface+skill, data= data_search);  anova(aovsearch); 
+summary(aovsearch)$coefficients 
 ```
-Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface. Furthermore, the summary shows that interface three gives the highest alpha parameter value, making the time it takes for this interface the longest. For the shortest search time, interface 1 can be combined with skill levels 1,2 or 3 since all three have the lowest alpha parameter values without being significant. For the estimation of time it takes a typical user of skill level 3 using interface 3 we can calculate Y by summing the estimates and adding the error, giving a time of 24.3 units.
+Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface (p-value < 0.05). Furthermore, the summary shows that interface 3 gives the highest $\alpha$ parameter value, making the time it takes for this interface the longest. For the shortest search time, interface 1 can be combined with skill levels 1,2 or 3 since all three have the lowest $\alpha$ parameter values without 2 and 3 being significant different from skill level 0. 
+
+For the estimation of time it takes a typical user of skill level 3 using interface 3 we can calculate Y by summing the estimates and adding the error, giving a time of 24.3 units:
+```{r}
+# Estimate interface 3 and skill 3:
+Y = 15.01+4.46+3.03+1.8; Y
+```
 
 **c)** Check the model assumptions by using relevant diagnostic tools.
 
@@ -135,58 +131,60 @@ plot(aovsearch,2)
 plot(aovsearch,1)
 ```
 
-As shown in the above QQ-plot and the residuals-fitted plot there are some outliers that raises some doubt about the normality of the data.
-
+As shown in the above QQ-plot and the residuals-fitted plot there are some outliers (points 2, 6, 14) that raise doubt about the normality of the data, however there does not seem to be a clear trend in residuals vs fitter plot.
 
 **d)** Perform the Friedman test to test whether there is an effect of interface.
 
 ```{r}
-friedman.test(data_search$time, data_search$interface, data_search$skill)
+friedman.test(data_search$time, data_search$interface, data_search$skill)$p.value
 ```
-The test shows a p-value o 0.04 which is significant as it is lower than our $\alpha$-value of 0.05. This means that the $H_0$ can be rejected and we can state that there is a significant effect of the interface. 
+The test shows a p-value o 0.04 which is significant. This means that the $H_0$ can be rejected and we can state that there is a significant effect of the interface. 
 
 **e)** Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
 
 ```{r}
-aovsearch = lm(data_search$time~data_search$interface)
-anova(aovsearch) 
+anova(lm(data_search$time~data_search$interface))
 ```
 is it not useless also to ignore skill since the time is clearly also depended on this variable, you can not simply ignore such a variable right?
 
 Looking at the p-value of the one-way ANOVA test, we see that is not significant. We could therefore conclude that the interfaces does not have a significant effect on the search time. However, since the data originates from a random block design, it is not correct to use this test since it leaves out important interactions.
+Ignas: maybe last sentence as: However, since the data originates from a random block design, it is not correct to use this test since it leaves out important effects skill, which we observed to be significant in b).
 
 # Excercise 3
 
-In a study on the effect of feedingstuffs on lactation a sample of nine cows were fed with two types of food, and their milk production was measured. All cows were fed both types of food, during two periods, with a neutral period in-between to try and wash out carry-over effects. The order of the types of food was randomized over the cows. The observed data can be found in the file cow.txt, where A and B refer to the types of feedingstuffs.
+In a study on the effect of feedingstuffs on lactation, a sample of nine cows were fed with two types of food, and their milk production was measured. All cows were fed both types of food, during two periods, with a neutral period in-between to try and wash out carry-over effects. The order of the types of food was randomized over the cows. The observed data can be found in the file cow.txt, where A and B refer to the types of feedingstuffs.
 
 **a)** Test whether the type of feedingstuffs influences milk production using an ordinary "fixed effects" model, fitted with lm. Estimate the difference in milk production.
 
-```{r}
+```{r, warning=FALSE}
 # read data
 data <- read.table(file="data/cow.txt",header=TRUE)
 data$treatment <- as.factor(data$treatment); data$order <- as.factor(data$order)
 data$id <- as.factor(data$id); data$per <- as.factor(data$per)
-
 # perform fixed effects model analysis
 fixed_aov <- lm(milk ~ id + per + treatment, data = data)
-anova(fixed_aov)
+anova(fixed_aov); table <- summary(fixed_aov)$coefficients["treatmentB",]; print("Estimate for Treatment B:"); table
 ```
-From the results of fixed effects model above we see that the p-value for treatment is > 0.05, therefore we can not conclude that there is a significant effect of the treatment.
+From the results of fixed effects model above we see that the p-value for treatment is > 0.05, therefore we can conclude that there is no significant effect of the treatment. From the estimate of TreatmentB we see that $\beta_{treatment_B}$ = -0.051 (meaning that with treatment B we have -0.51 less milk production that with treatment A), however p-value > 0.05 and, therefore, the difference is insignificant. However, this model is not correct as it does not take into consideration the "random effect" introduced by the the order of the types of food randomization over the cows. 
 
-**b)** Repeat a) and b) by performing a mixed effects analysis, modelling the cow effect as a random effect (use the function lmer). Compare your results to the results found by using a mixed effects model.
+**b)** Repeat a) by performing a mixed effects analysis, modelling the cow effect as a random effect (use the function lmer). Compare your results to the results found by using a mixed effects model.
 ```{r, warning=FALSE}
 attach(data)
-mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE)
+mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE); summary(mixed_avo);
 mixed_avo_1 <- lmer(milk ~ order + per + (1|id),REML=FALSE)
 anova(mixed_avo_1, mixed_avo)
 ```
-The code above performed an ANOVA test between the random effect model with and without treatment in it. From the p-value of >0.05 we can not say that there is significant difference between the two models, therefore there is no significant effect of the treatment.
+The code above implemented the correct model that modeled the cows as "random effects". The fixed effects estimates in the summary table are the same as with the model in a). Furthermore, the code above performed an ANOVA test between the random effect model with and without treatment in it. The p-value for treatment is lower with this model than in a), however it is still > 0.05 - meaning, that there is no significant difference between the models with and without treatment, therefore there is no significant effect of the treatment. 
 
-**c** Study the commands:
+**c** Study the commands below. Does this produce a valid test for a difference in milk production? Is its conclusion compatible with the one obtained in a)? Why?
 ```{r, warning=FALSE}
-t.test(milk[treatment=="A"],milk[treatment=="B"], paired=TRUE)
+t.test(milk[treatment=="A"],milk[treatment=="B"], paired=TRUE)$p.value
 ```
-
+The code above performed a paired t-test (same treatment was done on the same cow) to test whether the means of the two populations are significantly different. Here, we see that p-value is > 0.05, which brings us to the same conclusion as with a) and b). However, this is not correct as we can see from the previous analysis that the order had a significant effect on the experimental outcomes - factor this t-test omits. This t-test is the same as performing a two-way ANOVA of treament + id. We can see that the p-value is the same:
+```{r, warning=FALSE}
+paste("p-value with two-way ANOVA:", 
+      round(anova(lm(milk ~ treatment + id, data = data))["treatment", ]$`Pr(>F)`, 3))
+```
 
 # Exercise 4
 
@@ -199,19 +197,16 @@ The contingency table test for homogeneity is appropriate because we want to kno
 **b)** Using  the  given  data  set,  investigate  whether  Austen  herself  was  consistent  in  her  different  novels. Where are the main inconsistencies?
 
 ```{r}
-data=read.table(file="data/austen.txt",header=TRUE)
-austen = data[,1:3]
-z = chisq.test(austen)
-z
-residuals(z)
+data <- read.table(file="data/austen.txt",header=TRUE)
+austen <- data[,1:3] # filter data to only have data from Austen
+z = chisq.test(austen); z; residuals(z)
 ```
 
-She is not inconsistent as the p-value is above 0.05. This means that we cannot reject the H0. She does however have some main inconsistency, which where the words "a", "that" and "without". As can be seen in the residual table above.
+She is not inconsistent as the p-value is above 0.05. This means that we cannot reject the $H_0$. She does however, have some main inconsistency, which where the words "a", "that" and "without". As can be seen in the residual table above.
 
+**c)** Was the admirer successful in imitating Austen's style? Perform a test including all data. If he was not successful, where are the differences?
 ```{r}
-z = chisq.test(data)
-z
-residuals(z)
+z = chisq.test(data); z; residuals(z)
 ```
 The fan is inconsistent as the p-value of the test is below 0.05. Therefore we have to reject the H0 and accept that the distribution of the words in the stories are not the same. Because Austen herself did not have this inconsistency we can say that the inconsistency is caused by the fan writer. The main inconsistencies were for the words "that" and "an". As can be seen in the residual table above.
 
@@ -246,10 +241,9 @@ plot(cooks_employ, type="b")
 cooks_pop = cooks.distance(lm(expend~pop, data = regression_data))
 plot(cooks_pop, type="b")
 ```
-Looking at the above plots we can see that for the variables bad, lawyers, employ and pop there exist potential and influence points. This is shown through the peaks in the cooks distance plots with peaks going above 1. 
+Looking at the above plots we can see that for the variables bad, lawyers, employ and pop there exist potential and influence points. This is shown through the peaks in the cooks distance plots with peaks going above 1. Based on this rule of thumb the influence points were removed from the data.
 
 ```{r}
-
 # Collinearity
 round(cor(regression_data),2)
 ```
@@ -265,7 +259,7 @@ car::vif(regressionlm)
 
 # Now it looks good
 ```
-**b)** Fit a linear regression model to the data.  Use both the step-up and the step-down method to find thebest model.  If step-up and step-down yield two different models, choose one and motivate your choice.
+**b)** Fit a linear regression model to the data.  Use both the step-up and the step-down method to find the best model.  If step-up and step-down yield two different models, choose one and motivate your choice.
 ```{r}
 
 # Step-up method
@@ -306,7 +300,7 @@ Step down method:
 **c)** Check the model assumptions (of the resulting model from b)) by using relevant diagnostic tools.
 ```{r}
 right_plot = lm(expend~lawyers+employ , data=regression_data)
-qqnorm(residuals(right_plot))
+par(mfrow=c(2,2))
 plot(fitted(right_plot), residuals(right_plot))
 plot(right_plot, 1)
 plot(right_plot, 2)
