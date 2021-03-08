@@ -307,7 +307,7 @@ Therefore, the final model from the step-up method is as follows:
 summary(model_crime_2)$coefficients
 ```
 
-$expend = -165.9828 + 0.0363 \times employ + 0.0432 \times crime$ 
+$expend = -165.9828 + 0.0363 \times employ + 0.0432 \times crime + error$ 
 
 ***Step-down method:***
 ```{r}
@@ -328,7 +328,7 @@ summary(lm(expend~employ, data=regression_data))$coefficients
 ```
 Even though the intercept parameter is insignificant, it is in principle not always a problem and could mean that the model starts at the origin. However, it will not be removed as we do not have enough information to make a concrete decision on this. The final model is as follows:
 
-$expend = 19.1763 + 0.0372 \times employ$
+$expend = 19.1763 + 0.0372 \times employ + error$
 
 **c)** Check the model assumptions (of the resulting model from b)) by using relevant diagnostic tools.
 ```{r, fig.width = 12, fig.height=6}
