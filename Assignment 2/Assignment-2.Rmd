@@ -5,12 +5,14 @@ output:
   pdf_document: default
   html_document:
     df_print: paged
+fontsize: 5pt
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(rstudioapi)
 library(lme4)
+library(car)
 
 knitr::opts_chunk$set(echo = TRUE)
 setwd(dirname(getActiveDocumentContext()$path))
@@ -25,10 +27,11 @@ If left alone bread will become moldy, rot or decay otherwise.  To investigate t
 
 **a)**The 18 slices came from a single loaf, but were randomized to the 6 combinations of conditions.  Present an R-code for this randomization process.
 ```{r}
-data_bread <- read.table(file="data/bread.txt",header=TRUE)
+data_bread <- read.table(file="data/bread.txt", header=TRUE)
 humid <- factor(rep(c("dry","wet"),each = 9))
-temp <- factor(rep(c("cold", "intermediate","warm"),times = 6))
-knitr::kable(data.frame(humid,temp,slice = sample(1:18)))
+temp <- factor(rep(c("cold", "intermediate","warm"), times = 6))
+knitr::kable(data.frame(humid,temp,slice = sample(1:18)), 
+             caption = "Randomised combinations")
 ```
 
 **b)**Make two boxplots of hours versus the two factors and two interaction plots (keeping the two factors fixed in turn).
@@ -52,9 +55,9 @@ anova(dataaov)
 summary(dataaov)$coefficients
 
 ```
-When looking at the two-way anova model we see that it consists of the following terms: $Y_{ijk}$ = $\mu_{ij}$ + $e_{ijk}$ = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula it this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
+When looking at the two-way anova model we see that it consists of the following terms: $Y_{ijk}$ = $\mu_{ij}$ + $e_{ijk}$ = $\mu + alpha_{i}$ + $\beta_{j}$ + $\gamma_{ij}$ + $e_{eijk}$ We decompose the formula in this way such that $\mu$ is the overall mean, $\alpha_{i}$ and $\beta_{j}$ are the main effect of level i and j of the first factor and second factor respectively and $\gamma_{ij}$ the interaction effect. 
 
-In order to test the effect of the temperature,humidity,  and  the interaction we set up 3 hypotheses which are:
+In order to test the effect of the temperature, humidity and  the interaction we set up 3 hypotheses which are:
 $H_{AB}$: $\gamma_{ij}$ = 0 for every (i, j) (no interactions between factor A and B)
 
 $H_{A}$: $\alpha_{i}$ = 0 for every i (no main effect of factor A)
@@ -71,15 +74,7 @@ The interaction effect looks at the difference of differences, for example: it l
 
 **d)** Which of the two factors has the greatest (numerical) influence on the decay?  Is this a good question?
 
-```{r}
-# Without interaction
-humidity=as.factor(humidity)
-environment=as.factor(environment)
-dataaov=lm(hours~humidity+environment)
-anova(dataaov)
-```
-
-When we want to know which factor has the greatest influence we want to use the additive model as used above. This shows a p-value of 0.026 for humidity and a p-value of 3.7e-05 for environemnt. This means that the environment has the greatest influence. 
+To answer this question we would need to construct an additive model. However, in $c)$ we concluded that there is significant interaction between the two factors, therefore, it is not proper to simply decompose the effects of the two factors with the additive model - the question is not correct.
 
 **e)**  Check the model assumptions by using relevant diagnostic tools.  Are there any outliers?
 
@@ -89,8 +84,7 @@ dataaov2=lm(hours~humidity*environment,data=data_bread);
 plot(dataaov2, 1)
 plot(dataaov2, 2)
 ```
-The qqplot shows a somewhat linear line which means that based on the qqplot we can state that the data is normally distributed. We also looked at the spread of the residuals, which showed that there are three outliers which are number 5, 7 and 8 which can be observed in both plot.
-
+The qqplot shows a somewhat linear line which means we can conclude that the data is normally distributed - however, there are some outliers at the extremes marked with 5, 7 and 8. We also looked at the Residuals vs Fitter plot, which showed no obvious relationship - which is an acceptable behavior.
 
 # Exercise 2
 
@@ -102,7 +96,7 @@ A researcher is interested in the time it takes a student to find a certain prod
 interface <- factor(rep(c(1,2,3),each = 5))
 skill <- factor(rep(c(1,2,3,4,5),times = 3))
 student <- c(1:15) # shouldn't we also sample the students here? or then sample those 15 combinations? whichever one, i do not think it matters
-knitr::kable(data.frame(student,skill,interface))
+knitr::kable(data.frame(student,skill,interface), caption = "Randomised block design")
 ```
 
 **b)** Test the null hypothesis that the search time is the same for all interfaces. What type of interface does require the longest search time? For which combination of skill level and type of interface is the search time the shortest? Estimate the time it takes a typical user of skill level 3 to find the product on the website if the website uses interface 3.
@@ -115,40 +109,38 @@ data_search$interface <- as.factor(data_search$interface)
 aovsearch = lm(time~interface+skill, data= data_search);  anova(aovsearch); 
 summary(aovsearch)$coefficients 
 ```
-Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface (p-value < 0.05). Furthermore, the summary shows that interface 3 gives the highest $\alpha$ parameter value, making the time it takes for this interface the longest. For the shortest search time, interface 1 can be combined with skill levels 1,2 or 3 since all three have the lowest $\alpha$ parameter values without 2 and 3 being significant different from skill level 0. 
+Looking at the additive ANOVA test we can conclude that there is a significant main effect of the interface (p-value < 0.05) - therefore, the search times are not the same between the interfaces. Furthermore, the summary shows that interface 3 gives the highest $\alpha$ parameter value, making search time the longest for this interface type. For the shortest search time, interface 1 can be combined with skill levels 1, 2 or 3 since all three have the lowest $\alpha$ parameter values with 2 and 3 not being significant different from skill level 1. 
 
-For the estimation of time it takes a typical user of skill level 3 using interface 3 we can calculate Y by summing the estimates and adding the error, giving a time of 24.3 units:
+For the estimation of time it takes a typical user of skill level 3 using interface 3 we can calculate Y by summing the estimates and adding the error, giving a time of 23.97 units:
 ```{r}
 # Estimate interface 3 and skill 3:
-Y = 15.01+4.46+3.03+1.8; Y
+options(digits=10)
+Y = 15.01+4.46+3.03+1.47; Y
+options(digits=3)
 ```
 
 **c)** Check the model assumptions by using relevant diagnostic tools.
 
 ```{r, fig.width = 12, fig.height=6}
-par(mfrow=c(1,2))
-plot(aovsearch,2)
-plot(aovsearch,1)
+par(mfrow=c(1,2)); plot(aovsearch,2); plot(aovsearch,1)
 ```
 
-As shown in the above QQ-plot and the residuals-fitted plot there are some outliers (points 2, 6, 14) that raise doubt about the normality of the data, however there does not seem to be a clear trend in residuals vs fitter plot.
+As shown in the above QQ-plot and the residuals-fitted plot there are some outliers (points 2, 6, 14) that raise doubt about the normality of the data. There seems to be some relationship visible, albeit small, in the Residuals vs Fitted plot - it would be a good idea to perform and extra test suitable for non-normal data.
 
 **d)** Perform the Friedman test to test whether there is an effect of interface.
 
 ```{r}
 friedman.test(data_search$time, data_search$interface, data_search$skill)$p.value
 ```
-The test shows a p-value o 0.04 which is significant. This means that the $H_0$ can be rejected and we can state that there is a significant effect of the interface. 
+The test shows a p-value < 0.05 which is significant. This means that the $H_0$ can be rejected and we can state that there is a significant effect of the interface. 
 
 **e)** Test the null hypothesis that the search time is the same for all interfaces by a one-way ANOVA test, ignoring the variable skill. Is it right/wrong or useful/not useful to perform this test on this dataset?
 
 ```{r}
 anova(lm(data_search$time~data_search$interface))
 ```
-is it not useless also to ignore skill since the time is clearly also depended on this variable, you can not simply ignore such a variable right?
 
-Looking at the p-value of the one-way ANOVA test, we see that is not significant. We could therefore conclude that the interfaces does not have a significant effect on the search time. However, since the data originates from a random block design, it is not correct to use this test since it leaves out important interactions.
-Ignas: maybe last sentence as: However, since the data originates from a random block design, it is not correct to use this test since it leaves out important effects skill, which we observed to be significant in b).
+Looking at the p-value (> 0.05) of the one-way ANOVA test, we see that it is not significant. We could therefore conclude that the interfaces does not have a significant effect on the search time. However, since the data originates from a randomised block design, it is not correct to use this test since it leaves out important effects of the skill level, which we observed to be significant in $b)$ and $d)$.
 
 # Excercise 3
 
@@ -163,9 +155,10 @@ data$treatment <- as.factor(data$treatment); data$order <- as.factor(data$order)
 data$id <- as.factor(data$id); data$per <- as.factor(data$per)
 # perform fixed effects model analysis
 fixed_aov <- lm(milk ~ id + per + treatment, data = data)
-anova(fixed_aov); table <- summary(fixed_aov)$coefficients["treatmentB",]; print("Estimate for Treatment B:"); table
+anova(fixed_aov); table <- summary(fixed_aov)$coefficients["treatmentB",]
+print("Estimate for Treatment B:"); table
 ```
-From the results of fixed effects model above we see that the p-value for treatment is > 0.05, therefore we can conclude that there is no significant effect of the treatment. From the estimate of TreatmentB we see that $\beta_{treatment_B}$ = -0.051 (meaning that with treatment B we have -0.51 less milk production that with treatment A), however p-value > 0.05 and, therefore, the difference is insignificant. However, this model is not correct as it does not take into consideration the "random effect" introduced by the the order of the types of food randomization over the cows. 
+From the results of the fixed effects model above we see that the p-value for treatment is > 0.05, therefore we can conclude that there is no significant effect of the treatment. From the estimate of TreatmentB we see that $\beta_{treatment_B}$ = -0.51 (meaning that with treatment B we have 0.51 less milk production than with treatment A), however p-value > 0.05 and, therefore, the difference is insignificant. However, this model is not correct as it does not take into consideration the "random effects" introduced by the the order of the types of food randomization over the cows. 
 
 **b)** Repeat a) by performing a mixed effects analysis, modelling the cow effect as a random effect (use the function lmer). Compare your results to the results found by using a mixed effects model.
 ```{r, warning=FALSE}
@@ -174,13 +167,13 @@ mixed_avo <- lmer(milk ~ treatment + order + per + (1|id),REML=FALSE); summary(m
 mixed_avo_1 <- lmer(milk ~ order + per + (1|id),REML=FALSE)
 anova(mixed_avo_1, mixed_avo)
 ```
-The code above implemented the correct model that modeled the cows as "random effects". The fixed effects estimates in the summary table are the same as with the model in a). Furthermore, the code above performed an ANOVA test between the random effect model with and without treatment in it. The p-value for treatment is lower with this model than in a), however it is still > 0.05 - meaning, that there is no significant difference between the models with and without treatment, therefore there is no significant effect of the treatment. 
+The code above implemented the correct model that modeled the cows as "random effects". The fixed effects estimates in the summary table are the same as with the model in a). Furthermore, the code above performed an ANOVA test between the random effect model with and without treatment in it. The p-value for treatment is lower with this model than in a), however it is still > 0.05 - meaning, that there is no significant difference between the models of with and without treatment, therefore there is no significant effect of the treatment. 
 
-**c** Study the commands below. Does this produce a valid test for a difference in milk production? Is its conclusion compatible with the one obtained in a)? Why?
+**c)** Study the commands below. Does this produce a valid test for a difference in milk production? Is its conclusion compatible with the one obtained in a)? Why?
 ```{r, warning=FALSE}
 t.test(milk[treatment=="A"],milk[treatment=="B"], paired=TRUE)$p.value
 ```
-The code above performed a paired t-test (same treatment was done on the same cow) to test whether the means of the two populations are significantly different. Here, we see that p-value is > 0.05, which brings us to the same conclusion as with a) and b). However, this is not correct as we can see from the previous analysis that the order had a significant effect on the experimental outcomes - factor this t-test omits. This t-test is the same as performing a two-way ANOVA of treament + id. We can see that the p-value is the same:
+The code above performed a paired t-test (same treatment was done on the same cow) to test whether the means of the two populations are significantly different. Here, we see that p-value is > 0.05, which brings us to the same conclusion as with a) and b). However, this is not correct as we can see from the previous analysis that the order had a significant effect on the experimental outcomes - a factor this t-test omits. This t-test is the same as performing a two-way ANOVA of treament + id. We can see that the p-value is the same:
 ```{r, warning=FALSE}
 paste("p-value with two-way ANOVA:", 
       round(anova(lm(milk ~ treatment + id, data = data))["treatment", ]$`Pr(>F)`, 3))
@@ -192,7 +185,7 @@ Stochastic models for word counts are used in quantitative studies on literary s
 
 **a)** Discuss whether a contingency table test for independence or for homogeneity is most appropriate here.
 
-The contingency table test for homogeneity is appropriate because we want to know if the fan writer imitates Austen in a good way. This means that we want to test whether or not the different columns of data in the table come from the same population (writer) or not, which would be the case it the fan imitated Austen correctly. The H0 of the contingency table test for homogeneity states that the distribution of the words is the same for the stories.
+The contingency table test for homogeneity is appropriate because we want to know if the fan writer imitates Austen in a good way. This means that we want to test whether or not the different columns of data in the table come from the same population (writer) or not, which would be the case it the fan imitated Austen correctly. The $H_0$ of the contingency table test for homogeneity states that the distribution of the words is the same for the stories.
 
 **b)** Using  the  given  data  set,  investigate  whether  Austen  herself  was  consistent  in  her  different  novels. Where are the main inconsistencies?
 
@@ -202,13 +195,13 @@ austen <- data[,1:3] # filter data to only have data from Austen
 z = chisq.test(austen); z; residuals(z)
 ```
 
-She is not inconsistent as the p-value is above 0.05. This means that we cannot reject the $H_0$. She does however, have some main inconsistency, which where the words "a", "that" and "without". As can be seen in the residual table above.
+She is not inconsistent as the p-value is above 0.05. This means that we cannot reject the $H_0$. She does however, have some main inconsistency, which are the words "a", "that" and "without" - as can be seen in the residual table above.
 
 **c)** Was the admirer successful in imitating Austen's style? Perform a test including all data. If he was not successful, where are the differences?
 ```{r}
 z = chisq.test(data); z; residuals(z)
 ```
-The fan is inconsistent as the p-value of the test is below 0.05. Therefore we have to reject the H0 and accept that the distribution of the words in the stories are not the same. Because Austen herself did not have this inconsistency we can say that the inconsistency is caused by the fan writer. The main inconsistencies were for the words "that" and "an". As can be seen in the residual table above.
+The fan is inconsistent as the p-value of the test is below 0.05. Therefore, we have to reject the $H_0$ and accept that the distribution of the words in the stories are not the same. Because Austen herself did not have this inconsistency we can say that the inconsistency is caused by the fan writer. The main inconsistencies were for the words "that" and "an". As can be seen in the residual table above.
 
 
 # Exercise 5
@@ -219,89 +212,139 @@ The data in expenses crime.txt were obtained to determine factors related to sta
 data_crime = read.table(file="data/expensescrime.txt",header=TRUE)
 regression_data = data_crime[2:7]
 pairs(regression_data)
-
-par(mfrow=c(2,3))
-plot(data_crime$expend,data_crime$crime)
-plot(data_crime$expend,data_crime$bad)
-plot(data_crime$expend,data_crime$lawyers)
-plot(data_crime$expend,data_crime$employ)
-plot(data_crime$expend,data_crime$pop)
 ```
+From the pairs plot above we can clearly see linear relationships between predictors $bad$, $lawyer$, $employ$ and $pop$ - this could cause a problem of collinearity. Looking at predictors vs $expend$ we can see a strong linear relationship with $bad$, $lawyers$, $employ$ and $pop$; no obvious relationship can be observed with $crime$.
 
+***Influence points***
+```{r, fig.width = 8, fig.height=3}
+cooks_crime <- cooks.distance(lm(expend~crime + bad + lawyers + employ + pop, 
+                                 data = regression_data))
+plot(cooks_crime, type="b");
+# remove influence points from the data
+remove <- which(cooks_crime > 1); 
+regression_data <- regression_data %>% mutate(row_n = row_number()) %>%
+  filter(!(row_n %in% remove)) %>% select(-row_n)
+```
+Model containing all of predictors was chosen to find influence points as we have not yet selected which predictors will be used in the final model. From the figure above we can see that points 5, 8, 35 and 44 have Cook's distance of > 1, therefore they were regarded as influence points and removed from the data.
+
+***Collinearity***
 ```{r}
-par(mfrow=c(2,3))
-cooks_crime = cooks.distance(lm(expend~crime, data = regression_data))
-plot(cooks_crime, type="b")
-cooks_bad = cooks.distance(lm(expend~bad, data = regression_data))
-plot(cooks_bad, type="b")
-cooks_lawyers = cooks.distance(lm(expend~lawyers, data = regression_data))
-plot(cooks_lawyers, type="b")
-cooks_employ = cooks.distance(lm(expend~employ, data = regression_data))
-plot(cooks_employ, type="b")
-cooks_pop = cooks.distance(lm(expend~pop, data = regression_data))
-plot(cooks_pop, type="b")
+knitr::kable(round(cor(regression_data),2), caption = "Correlation coefficients")
 ```
-Looking at the above plots we can see that for the variables bad, lawyers, employ and pop there exist potential and influence points. This is shown through the peaks in the cooks distance plots with peaks going above 1. Based on this rule of thumb the influence points were removed from the data.
+Correlation table above produced results similar to what was observer with pairs plot before - we see that (excluding variable $crime$), the lowest correlation coefficient is 0.85 (between $bad$ and $lawyers$), which is still a high correlation coefficient. This means that all predictors (excluding $crime$) carry similar information.
 
-```{r}
-# Collinearity
-round(cor(regression_data),2)
-```
-Looking at the collinearity table we see that employee and and lawyers are strongly correlated(0.97). Furthermore, we also see that employee and crime rate per 100000 are strongly correlated(0.87). Also for lawyers and crime rate per 100000 it shows that they are strongly correlated(0.83). Lastly we also see a correlation between pop and bad and pop and lawyers and pop and employ.
-
-```{r}
-regressionlm=lm(expend~bad+crime+lawyers+employ, data=regression_data)
-car::vif(regressionlm)
-# We see a value above 5 for lawyers and employees which means we need to take one out
-
-regressionlm=lm(expend~bad+crime+lawyers, data=regression_data)
-car::vif(regressionlm)
-
-# Now it looks good
-```
 **b)** Fit a linear regression model to the data.  Use both the step-up and the step-down method to find the best model.  If step-up and step-down yield two different models, choose one and motivate your choice.
+
+***Step-up method:***
 ```{r}
+# level 1
+model_bad <- lm(expend~bad, data=regression_data); 
+model_crime <- lm(expend~crime, data=regression_data)
+model_lawyers <- lm(expend~lawyers, data=regression_data); 
+model_employ <- lm(expend~employ, data=regression_data)
+model_pop <- lm(expend~pop, data=regression_data)
+level1_models <- list(model_bad, model_crime, model_employ, model_lawyers, model_pop); 
+variables_1 <- c("bad", "crime", "employ", "lawyears", "pop")
 
-# Step-up method
+r_squared_values_1 <- c()
+for(model_1 in level1_models){
+  r_squared <-  summary(model_1)$r.squared
+  r_squared_values_1 <- c(r_squared_values_1, r_squared)
+}
 
-print("1st level:")
-paste("Bad:",round(summary(lm(expend~bad, data=regression_data))$r.squared, 3))
-paste("Crime: ", round(summary(lm(expend~crime, data=regression_data))$r.squared, 3))
-paste("Lawyers: ", round(summary(lm(expend~lawyers, data=regression_data))$r.squared, 3)) #0.9369
-paste("Employ: ", round(summary(lm(expend~employ, data=regression_data))$r.squared, 3), "- selected")#0.954
-paste("Pop: ", round(summary(lm(expend~pop, data=regression_data))$r.squared, 3)) # 0.907
+knitr::kable(data.frame(Predictor = variables_1, r.squared = r_squared_values_1) %>%
+               mutate(Selected = if_else(r.squared == max(r.squared),"Yes", "No")), 
+             caption = "Step-up: Level 1")
 
+# level 2
+model_bad_2 <- lm(expend~employ+bad, data=regression_data); 
+model_crime_2 <- lm(expend~employ+crime, data=regression_data)
+model_pop_2 <- lm(expend~employ+pop, data=regression_data); 
+model_lawyers_2 <- lm(expend~employ+lawyers, data=regression_data)
+level2_models <- list(model_bad_2, model_crime_2, model_lawyers_2, model_pop_2); 
+variables_2 <- c("employ+bad", "employ+crime", "employ+lawyears", "employ+pop")
 
-print("2nd level: employ +")
-paste("Bad:",round(summary(lm(expend~employ+bad, data=regression_data))$r.squared, 3))
-paste("Crime: ",round(summary(lm(expend~employ+crime, data=regression_data))$r.squared, 3))
-paste("Pop: ",round(summary(lm(expend~employ+pop, data=regression_data))$r.squared, 3))
-paste("Lawyers: ",round(summary(lm(expend~employ+lawyers, data=regression_data))$r.squared, 3), "- selected") #0.9631 ==> only significant model
+r_squared_values_2 <- c()
+significance_2 <- c()
+for(model_1 in level2_models){
+  is_significant <- sum(c(summary(model_1)$coefficients[,4] < 0.05)) > 2 
+  r_squared <-  summary(model_1)$r.squared
+  r_squared_values_2 <- c(r_squared_values_2, r_squared)
+  significance_2 <- c(significance_2, is_significant) 
+}
 
+knitr::kable(data.frame(Predictor = variables_2, r.squared = r_squared_values_2, 
+  Significant = significance_2) %>% mutate(Selected = if_else(Significant,"Yes", "No")), 
+  caption = "Step-up: Level 2")
 
-# expend = -1.146e+02 + 2.690e-02*lawyers + 2.976e-02*employ  + error
-# Step-down
+# level 3
 
-summary(lm(expend~bad+crime+lawyers+employ + pop, data=regression_data))
+model_bad_3 <- lm(expend~employ+crime+bad, data=regression_data);
+model_pop_3 <- lm(expend~employ+crime+pop, data=regression_data);
+model_lawyers_3 <- lm(expend~employ+crime+lawyers, data=regression_data);
+level3_models <- list(model_bad_3, model_lawyers_3, model_pop_3); 
+variables_3 <- c("employ+crime+bad", "employ+crime+lawyers", "employ+crime+pop")
 
-summary(lm(expend~lawyers+employ+bad + pop, data=regression_data))
+r_squared_values_3 <- c()
+significance_3 <- c()
+for(model_1 in level3_models){
+  is_significant <- sum(c(summary(model_1)$coefficients[,4] < 0.05)) > 3 
+  r_squared <-  summary(model_1)$r.squared
+  r_squared_values_3 <- c(r_squared_values_3, r_squared)
+  significance_3 <- c(significance_3, is_significant) 
+}
 
-summary(lm(expend~lawyers+employ + bad, data=regression_data))
+knitr::kable(data.frame(Predictor = variables_3, r.squared = r_squared_values_3, 
+  Significant = significance_3) %>% 
+    mutate(Selected = if_else(Significant & r.squared == max(r.squared),"Yes", "No")), 
+  caption = "Step-up: Level 3")
 
-summary(lm(expend~lawyers+employ , data=regression_data))
+```
+***Step up method:***
+First we started by fitting a linear model with one explanatory variable. Out of the 5 available variables $employ$ performed the best according to r-squared value, therefore it was selected for further fitting. Next, another layer of explanatory variables was added to the linear model. Here, only adding $crime$ resulted in a model that had all significant parameters, therefore it was the model we carried on with. Next, we added a third layer of variables. $pop$ seemed to give the best results according to r-squared values (and also had all significant parameters). However, looking back at previous analysis, we know that $pop$ and $employ$ are strongly correlated and it would not make sense to have them in the same model, therefore we performed VIF analysis:
+```{r}
+# VIF analysis
+vif(model_pop_3)
+```
+From the VIF analysis we see that indeed having these two parameters should be avoided as VIF for them is > 5. We removed $pop$ from the model even though it had lower VIF - removing $employ$ resulted in lower r-squared value. Removal of this variable did not have a high impact on the r-squared value as addition of it only brought marginal improvement. Therefore, the final model from the step-up method is as follows: 
+
+```{r}
+# final model
+summary(model_crime_2)$coefficients
 ```
 
-Step up method:
-First we started by fitting a linear model with one explanatory variable. Out of the 5 available variables the employ performed the best according to r-squared value, therefore it was selected for further fitting. Next, another layer of explanatory variables were added to the linear model. Here, only adding Lawyers resulted in a model that had all significant parameters, therefore it was the final model that we chose.
+$expend = -165.9828 + 0.0363 \times employ + 0.0432 \times crime$ 
 
-Step down method:
+***Step-down method:***
+```{r}
+# step down method - start with all
+summary(lm(expend~bad+crime+lawyers+employ+pop, data=regression_data))$coefficients
+# remove bad
+summary(lm(expend~crime+lawyers+employ+pop, data=regression_data))$coefficients
+# remove lawyers
+summary(lm(expend~crime+employ+pop, data=regression_data))$coefficients
+```
+***Step-down method:***
+We started with a model that used all of the available predictors. From the summary table we see that $bad$ had the highest (and insignificant) p-value - therefore, it was removed. Next we see that $lawyers$ was the only insignificant parameter and therefore, was removed from the model. The resulting model of $crime + employ + pop$ has all significant parameters and is the same as produced with the step-up method. However, as before, $pop$ should be removed as it is colinear with $employ$.
 
+***Conclusion***
+Both step-up and step-down methods bring us to the same model of $employ + crime$. However, we can see that both models posses a negative intercept. Conceptually, this does not make sense as the expenditure of the government can not be negative even if all of the predictors are 0. Taking this into consideration, in addition to Occam's razor principle and the fact that introduction of extra predictor ($crime$) to $employ$ did not bring substantial improvement to r-squared (only $\approx$ +0.01) we choose the following model as the final model:
+```{r}
+summary(lm(expend~employ, data=regression_data))$coefficients
+```
+Even though the intercept parameter is insignificant, it is in principle not always a problem and could mean that the model starts at the origin. However, it will not be removed as we do not have enough information to make a concrete decision on this. The final model is as follows:
+
+$expend = 19.1763 + 0.0372 \times employ$
 
 **c)** Check the model assumptions (of the resulting model from b)) by using relevant diagnostic tools.
-```{r}
-right_plot = lm(expend~lawyers+employ , data=regression_data)
-par(mfrow=c(2,2))
-plot(fitted(right_plot), residuals(right_plot))
+```{r, fig.width = 12, fig.height=6}
+right_plot = lm(expend~employ , data=regression_data)
+par(mfrow=c(1,2))
 plot(right_plot, 1)
 plot(right_plot, 2)
 ```
+
+From the diagnostic plots above:
+
+* Normal qq-plot: residuals follow a straight line pretty well, however there are some outliers at the extremes - removing them could improve the results.
+* Residuals vs fitted: as desired, there does not seem to be any trend.
