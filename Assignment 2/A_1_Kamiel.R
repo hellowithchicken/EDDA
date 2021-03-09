@@ -225,8 +225,9 @@ summary(lm(expend~lawyers+employ , data=regression_data))
 # Diagnostic tools for normality
 
 
-plot(fitted(regressionlm), residuals(regressionlm))
+
 right_plot = lm(expend~lawyers+employ , data=regression_data)
 qqnorm(residuals(right_plot))
+plot(fitted(right_plot), residuals(right_plot))
 plot(right_plot, 1)
 plot(right_plot, 2)
