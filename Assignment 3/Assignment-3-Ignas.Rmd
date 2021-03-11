@@ -1,0 +1,80 @@
+---
+title: "EDDA - Assignment 3 - Group 77"
+subtitle: "Dante de Lang, Ignas Krikštaponis and Kamiel Gülpen"
+output: pdf_document
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi)
+library(lme4)
+library(car)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 3 digits
+options(digits = 3)
+```
+
+
+# Exercise 1
+
+To investigate the effect of sexual activity on longevity of fruit flies, 75 male fruit flies were divided randomly in three groups of 25. The fruit flies in the first group were kept solitary, those in the second were kept together with one virgin female fruit fly per day, and those in the third group were kept together with eight virgin female fruit flies a day. In the data-file fruitflies.txt the three groups are labelled isolated, low and high. The number of days until death (longevity) was measured for all flies. Later, it was decided to measure also the length of their thorax. Add a column loglongevity to the data-frame, containing the logarithm of the number of days until death. Use this as the response variable in the following.
+
+**a)** Make an informative plot of the data. Investigate whether sexual activity influences longevity by performing a statistical test, without taking the thorax length into account. What are the estimated longevities for the three conditions? Comment.
+```{r}
+data_flies <- read.table(file="data/fruitflies.txt", header=TRUE)
+data_flies$activity <- as.factor(data_flies$activity)
+# add loglongevity
+data_flies <- data_flies %>% mutate(loglongevity = log10(longevity))
+# make informative plot - boxplot
+plot(data_flies$loglongevity~data_flies$activity)
+```
+```{r, fig.width = 12, fig.height=6}
+# perform test to see if sexual activity has an effect on longevity
+model <- lm(loglongevity~activity, data = data_flies) # prepare model
+par(mfrow=c(1,2)); plot(model, 1); plot(model, 2) # investigate normality
+# perform one-way ANOVA
+anova(model); summary(model)$coefficients
+```
+One-way ANOVA was performed to investigate whether sexual activity has an effect on loglongevity. From the results we can see that the p-values < 0.05 meaning that there sexual activity significantly influences loglongevity. From the summary table we can see that all estimates are significantly different from 0: for high sexual activity the estimate is 1.5644, for isolated it is 1.5644 + 0.2246 = 1.7890 and low it is 1.5644 + 0.1727 = 1.7371.
+
+Test diagnostics: no relationship can be observed in the residuals vs fitted plot. QQ-plot seems to follow a straigt line, however there are some outliers at the extremes.
+
+**b)** Investigate whether sexual activity influences longevity by performing a statistical test, now including thorax length as an explanatory variable into the analysis. Does sexual activity increase or decrease longevity? What are the estimated longevities for the three groups, for a fly with average thorax length?
+
+```{r}
+# perform ANCOVA with interaction analysis
+model_interaction <- lm(loglongevity~thorax*activity, data = data_flies) # prepare model
+par(mfrow=c(1,2)); plot(model_interaction , 1); plot(model_interaction , 2) # investigate normality
+anova(model_interaction)
+```
+First we investigate if there is any significant interaction between thorax and activity by performing ANCOVA with interaction. (diagnostics show that data follows the required assumptions). From the results we can see that the interaction factor is insignificant and can be ignored, therefore we can now use the additive ANCOVA model.
+
+```{r}
+# perform additive ANCOVA analysis
+model <- lm(loglongevity~thorax+activity, data = data_flies) # prepare model
+par(mfrow=c(1,2)); plot(model , 1); plot(model , 2) # investigate normality
+anova(model); table <- summary(model)$coefficients; table
+# extract model's parameter
+intercept <- table[,1][1]; beta <- table[,1][2]
+alpha_high <- 0; alpha_low <- table[,1][4]
+alpha_isolated <- table[,1][3]
+# calculate mean thorax
+mean_thorax <- mean(data_flies$thorax)
+# calculate estimates
+estimate_high <- 10**(intercept + alpha_high + beta * mean_thorax)
+estimate_low <- 10**(intercept + alpha_low + beta * mean_thorax)
+estimate_isolated <- 10**(intercept + alpha_isolated + beta * mean_thorax)
+estimates <- c(estimate_isolated, estimate_low, estimate_high)
+activity_levels <- unique(as.character(data_flies$activity))
+knitr::kable(data.frame(Activity = activity_levels,
+                           `Longevity estimate` = estimates),
+             caption = "Longevity estimates for average thorax fruit fly")
+```
+Model diagnostics: from qq-plot we can see that the data follows a straight line well, however there are some outliers at the extremes. There does not seem to be any obvious relationship in the Residuals vs Fitted plot.
+
+From the ANCOVA analysis results above we can see that sexual activity has a significant effect (p-values < 0.05) on the loglongevity. From the estimates in the summary table we can see that sexual activity decreases longevity of the fruit flies as the estimates from isolated and low are positive and isolated has the highest estimate. Longevity estimates for average thorax fruit fly were calculated by calculating average thorax length ($X$) and extracting intercept ($\mu$), $\beta$ and $\alpha$ parameters from the model summary table - the values there plugged into the following formula:
+
+$Y \approx \mu + \alpha + \beta X$
