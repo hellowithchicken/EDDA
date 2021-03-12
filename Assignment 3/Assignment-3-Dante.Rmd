@@ -1,0 +1,151 @@
+---
+title: "EDDA - Assignment 3 - Group 77"
+subtitle: "Dante de Lang, Ignas Krikštaponis and Kamiel Gülpen"
+output: pdf_document
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi)
+library(lme4)
+library(car)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 3 digits
+options(digits = 3)
+```
+
+
+# Exercise 1
+
+**a)** Make an informative plot of the data. Investigate whether sexual activity influences longevity by performing a statistical test, without taking the thorax length into account. What are the estimated longevities for the three conditions? Comment.
+
+```{r}
+data_flies <- read.table(file="data/fruitflies.txt", header=TRUE)
+
+# Add log colomn
+data_flies$loglongevity <- log(data_flies$longevity)
+
+plot(data_flies)
+
+plot(thorax~loglongevity, pch=as.character(activity),data=data_flies)
+
+data_flies$activity <- as.factor(data_flies$activity)
+flies_lm_1 <- lm(loglongevity~activity, data=data_flies)
+
+anova(flies_lm_1)
+summary(flies_lm_1)
+
+```
+Anova gives significant result of influence activity on longevity (1.8e-7). Summary shows estimated loglongevity for different activity levels: 3.6021 for high, 3.6021+0.5172 for isolated and 3.6021+0.3977 for low. What is very peculiar about these results is that the isolated group without female fruit flies survives for the longest time while the group with high activity dies out first.
+
+**b)** Investigate whether sexual activity influences longevity by performing a statistical test, now including thorax length as an explanatory variable into the analysis. Does sexual activity increase or decrease longevity? What are the estimated longevities for the three groups, for a y with average thorax length?
+
+```{r}
+data_flies$activity <- as.factor(data_flies$activity)
+flies_lm_2 <- lm(loglongevity~thorax+activity, data=data_flies)
+
+anova(flies_lm_2)
+summary(flies_lm_2)
+
+drop1(flies_lm_2, test = "F")
+confint(flies_lm_2)
+```
+High sexual activity returns the lowest longevity, therefore we can state it decreases longevity. For the estimated longevities for the three groups we can follow the equation $Y_{in} = \mu + \alpha_i + \beta X_{in} + e_{in}$. This gives us the following values:
+Isolated = 1.2189+0.4100+2.9790+0.203 = 4.81
+Low = 1.2189+0.2857+2.9790+0.203 = 4.69
+High = 1.2189+0+2.9790+0.203 = 4.4
+
+**c)** How does thorax length influence longevity? Investigate graphically and by using an appropriate test whether this dependence is similar under all three conditions of sexual activity.
+
+```{r}
+plot(loglongevity~thorax,pch = unclass(activity),data=data_flies)
+activity_classes <- c("isolated","low","high")
+for (class in activity_classes) abline(lm(loglongevity~thorax, data=data_flies[data_flies$activity==class,]))
+
+flies_lm_3 <- lm(loglongevity~thorax*activity, data=data_flies)
+anova(flies_lm_3)
+summary(flies_lm_3)
+```
+
+Thorax length seems to have a positive effect on the longevity of the fruit flies, this is visually shown in the plot with the ablines. From the plot this seems to be the case for all three activity groups. When checking for interaction through ANOVA, we see no significant interaction between thorax and activity, therefore our first analysis can be trusted.
+
+**d)** Which of the two analyses, without or with thorax length, do you prefer? Is one of the analyses wrong?
+
+Since there is no interaction between thorax length and activity, I would suggest to use the model without. This will give clearer insights in the influence of activity on longevity. Dunno if last model with * is wrong?!?
+
+**e)** Verify normality and heteroscedasticity by making a normal QQ-plot of the residuals, and a residuals versus fitted plot, for the analysis that includes thorax length.
+```{r}
+plot(flies_lm_2, 2)
+plot(flies_lm_2, 1)
+```
+Looking at the QQ-norm plot we can assume normality since the datapoints resemble an almost linear line, only the outer values deviate a bit. For the residuals-fitted plot we can see asymmetry which is an indicator for heteroscedasticity.
+
+**f)** Perform the ancova analysis with the number of days as the response, rather than its logarithm. Verify normality and homoscedasticity of the residuals of this analysis. Was it wise to use the logarithm as response?
+```{r}
+flies_lm_4 <- lm(longevity~thorax+activity, data=data_flies)
+
+anova(flies_lm_4)
+
+plot(flies_lm_4, 2)
+plot(flies_lm_4, 1)
+```
+
+Here the QQ-norm plot again shows normality where only the lowest quantiles deviate form the fitted line. For the residuals-fitted plot we can also see clear symmetry with a fairly straight fitted line, this is then also an indicator for homoscedasticity.
+
+# Exercise 2
+
+**a)** Study the data and give a few (>1) summaries (graphics or tables).
+```{r}
+data_titan <- read.table(file="data/titanic.txt", header=TRUE)
+
+data_titan$PClass <- as.factor(data_titan$PClass)
+data_titan$Sex <- as.factor(data_titan$Sex)
+
+
+hist(data_titan$Age,main="age")
+boxplot(data_titan$Age~data_titan$PClass)
+
+titan_table_1 <- xtabs(~Sex+PClass, data=data_titan)
+titan_table_1
+
+titan_table_1.c <- xtabs(Survived~Sex+PClass, data=data_titan)
+round(titan_table_1.c/titan_table_1,2)
+
+# Not really nice but perhaps group age partners
+titan_table_2 <- xtabs(~Age, data=data_titan)
+barplot(xtabs(Survived~Age, data=data_titan)/titan_table_2) 
+```
+
+**b)** Fit a logistic regression model (no interactions yet) to investigate the association between the survival status and the predictors PClass, Age and Sex. Interpret the results in terms of odds, comment.
+```{r}
+
+titan_glm <- glm(Survived~PClass+Age+Sex,data=data_titan,family = binomial)
+
+summary(titan_glm)
+```
+Looking at the summary of the logistic regression model, we can see that the probability of survival is mostly dependent on class and sex. Namely, both have the most impact on the estimate.
+
+
+**c)** Investigate for interaction of predictor Age with factors PClass and Sex. From this and b), choose (and justify) a resulting model. For this model, report the estimate for the probability of survival for each combination of levels of the factors PClass and Sex for a person of age 53.
+
+```{r}
+titan_glm_inter <- glm(Survived~Age*PClass*Sex, data=data_titan)
+anova(titan_glm_inter, test="Chisq")
+```
+Looking at the above P-values for all possible interaction models, it seems that the Survived~Age*Sex model could give the best results. ??
+
+**d)** Propose a method to predict the survival status and a quality measure for your prediction and describe how you would implement that method (you do not need to implement it).
+```{r}
+
+```
+
+
+**e)** Another approach would be to apply a contingency table test to investigate whether factor passenger class (and gender) has an effect on the survival status. Implement the relevant test(s).
+```{r}
+
+```
+
+**f)** Is the second approach in e) wrong? Why or why not? Name both an advantage and a disadvantage of the two approaches, relative to each other.
