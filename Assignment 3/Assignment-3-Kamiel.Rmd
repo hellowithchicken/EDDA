@@ -1,0 +1,214 @@
+---
+title: "EDDA - Assignment 3 - Group 77"
+subtitle: "Dante de Lang, Ignas Krikštaponis and Kamiel Gülpen"
+output: pdf_document
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi)
+library(lme4)
+library(car)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 3 digits
+options(digits = 3)
+```
+
+
+# Exercise 1
+
+To investigate the effect of sexual activity on longevity of fruit flies, 75 male fruit flies were divided randomly in three groups of 25. The fruit flies in the first group were kept solitary, those in the second were kept together with one virgin female fruit fly per day, and those in the third group were kept together with eight virgin female fruit flies a day. In the data-file fruitflies.txt the three groups are labelled isolated, low and high. The number of days until death (longevity) was measured for all flies. Later, it was decided to measure also the length of their thorax. Add a column loglongevity to the data-frame, containing the logarithm of the number of days until death. Use this as the response variable in the following.
+
+**a)** Make an informative plot of the data. Investigate whether sexual activity influences longevity by performing a statistical test, without taking the thorax length into account. What are the estimated longevities for the three conditions? Comment.
+```{r}
+data_flies <- read.table(file="data/fruitflies.txt", header=TRUE)
+
+data_flies$loglongevity = log(data_flies$longevity)
+
+plot(loglongevity~thorax,pch=as.character(activity), data=data_flies)
+data_flies$activity=as.factor(data_flies$activity) 
+aov = lm(loglongevity~activity,data=data_flies)
+anova(aov)
+summary(aov)$coefficients
+```
+We see that a high activity a estimate gives of 3.602, low = 3.602 +0.398 = 4.0 and isolated = 3.602+0.517 = 4.19
+
+**(b)**investigate whether sexual activity influences longevity by performing a statistical test, now includingthorax length as an explanatory variable into the analysis.  Does sexual activity increase or decrease longevity?   What  are  the  estimated  longevities  for  the  three  groups,  for  a  fly  with  average  thorax length?
+```{r}
+aov1 = lm(loglongevity~thorax+activity,data=data_flies) 
+anova(aov1)
+summary(aov1)$coefficients
+
+```
+They still look significant with high = 1.219  low = 1.219 + 0.286 = 1.505  and isolated = 1.219 + 0.410 = 1.629 
+
+The plots look ok
+**(c)**  How does thorax length influence longevity?  Investigate graphically and by using an appropriate test whether this dependence is similar under all three conditions of sexual activity
+
+```{r}
+data_flies
+activities = c("isolated", "low", "high")
+
+plot(loglongevity~thorax, pch = unclass(activity), data = data_flies);for (i in 1:3) abline(lm(loglongevity~thorax,data=data_flies[data_flies$activity==activities[i],]))
+aov2=lm(loglongevity~activity*thorax,data=data_flies); anova(aov2)
+
+summary(aov2)
+```
+We see that in the graphical analysis that the thorax has a influence on the loglongevity, as we see that for all three types of activities the loglongevity rises when the thorax increases. After looking at the statistical test we see indeed that the thorax has a significant influence on the loglongevity as it has a p-value of 9.0e-15.
+
+**d)**  Which of the two analyses, without or with thorax length, do you prefer?  Is one of the analyses wrong?
+I prefer the analysis without the thorax as the the thorax and activity do not have a significant interaction. The second model is wrong if we want to look at the influence of activity becasue of this.
+
+
+**e)**Verify normality and heteroscedasticity by making a normal QQ-plot of the residuals, and a residualsversus fitted plot, for the analysis that includes thorax length.
+```{r}
+
+plot(aov1, 1)
+plot(aov1, 2)
+
+plot(aov2,1)
+plot(aov2,2)
+```
+
+
+The plots look somewhat ok. It does show some outliers.
+
+**f)**Perform the ancova analysis with the number of days as the response, rather than its logarithm.  Verifynormality and homoscedasticity of the residuals of this analysis.  Was it wise to use the logarithm as response?
+
+```{r}
+
+plot(longevity~thorax,pch=as.character(activity), data=data_flies)
+aov3 = lm(longevity~thorax+activity,data=data_flies) 
+drop1(aov3, test="F")
+summary(aov3)$coefficients
+
+
+plot(aov3,1)
+plot(aov3,2)
+
+```
+It looks normal also with the normal data but the intercept looks off as it has a estimate has a value of -61.26 which seems to be not correct.
+
+# Exercise 2. 
+
+On  April  15,  1912,  British  passenger  liner  Titanic  sank  after  colliding  with  an  iceberg.   There  were  notenough lifeboats for everyone onboard, resulting in the death of 1502 out of 2224 passengers and crew.  Thedata  filetitanic.txtgives  the  survival  status  of  passengers  on  the  Titanic,  together  with  their  names,age,  sex  and  passenger  class.   (About  half  of  the  ages  for  the  3rd  class  passengers  are  missing,  althoughmany of these could be filled in from the original source.)  The columns:Name– name of passenger;PClass– passenger class (1st, 2nd or 3rd),Age– age in years,Sex– male or female,Survived– survival status(1=Yes or 0=No)
+
+
+**a)** Study the data and give a few (>1) summaries (graphics or tables).
+```{r}
+data_titanic <- read.table(file="data/titanic.txt", header=TRUE)
+data_titanic[2,]
+age = data_titanic[,3]
+hist(age)
+
+class_sex =  xtabs(~PClass+ Sex, data=data_titanic)
+class_sex
+tot = xtabs(Survived~PClass+ Sex, data=data_titanic)
+tot
+round(tot/class_sex, 2)
+
+totage=xtabs(~age,data=data_titanic)
+barplot(xtabs(Survived~age, data=data_titanic)/totage)
+```
+The histogram shows the ages on board, while the first The table shows the total numbers of individuals for each combination of levels of class and sex. The second table shows the percentage of survivers based on sex and class. The last barplot shows the percentage per age group that survived.
+
+
+**(b)** Fit a logistic regression model (no interactions yet) to investigate the association between the survival status and the predictors  PClass,Age and Sex.  Interpret the results in terms of odds, comment
+```{r}
+titanicglm=glm(Survived~PClass+Sex+age,data=data_titanic,family=binomial)
+titanicglm=glm(Survived~PClass,data=data_titanic,family=binomial)
+titanicglm
+summary(titanicglm)$coefficients
+
+drop1(titanicglm,test="Chisq")
+
+odds_male_example =  exp(3.7597 + 1 * -1.2920 + 0 * -2.5214 + 1 * -2.6314 + 25 * -0.0392)
+odds_male_example
+odds_female_example =  exp(3.7597 + 0 * -1.2920 + 0 * -2.5214 + 0 * -2.6314 + 25 * -0.0392)
+odds_female_example
+```
+The odds can be defined as the probability of success devided by the probability of failure. The summary show that the odds of surviving is exp(3.7597 + PClass2nd * -1.2920 + PClass3rd * -2.5214 + Sexmale * -2.6314 + age * -0.0392). This means that the odds of survival while being a female in the first class is  exp(3.7597 + age * -0.0392). This shows that the odds of survival for a man who is 25 years old in the 2nd class is 0.319. While a woman who is in the first class and has a age of 25 has the odds of survival of 16.1. The drop1 table also shows that all estimators are significant.
+
+**c)**  Investigate for interaction of predictor Age with factors PClass and Sex.  From this and b),  choose(and justify) a resulting model.  For this model, report the estimate for the probability of survival for each combination of levels of the factors PClass and Sex for a person of age 53
+```{r}
+data_titanic$age = as.numeric(data_titanic$Age)
+glm3=glm(Survived~age*Sex,data=data_titanic,family=binomial);drop1(glm3,test="Chisq")
+summary(glm3)
+glm3=glm(Survived~age*PClass,data=data_titanic,family=binomial);drop1(glm3,test="Chisq")
+summary(glm3)
+```
+**d)**  Propose a method to predict the survival status and a quality measure for your prediction and describe how you would implement that method (you do not need to implement it).
+
+**e)**
+```{r}
+tab1 = table(data_titanic$Survived,data_titanic$Sex)
+tab1
+rowSums(tab1)
+colSums(tab1)
+chisq.test(tab1)
+
+tab2 = table(data_titanic$Survived,data_titanic$PClass)
+tab2
+rowSums(tab2)
+colSums(tab2)
+chisq.test(tab2)
+```
+The contingence table shows for both gender as class a significant result.
+
+
+**f)** Is the second approach in e) wrong? Name both an advantage and a disadvantage of the two approaches,relative to each other
+
+
+An advantage of the contingency table in relative to the logistic regression is that the table is easy to read and gives a insight right away. The main advantage of a logistic regression is that non existing data can be used in order to forecast the outcome.
+
+
+
+# Exercise 3.Military coups jn Africa To study the influence of different political and geographical variables on the number of military coups, thesedata are collected for several Sub Saharan African countries in the fileafrica.txt.
+
+**a)**
+
+```{r}
+data_africa <- read.table(file="data/africa.txt", header=TRUE)
+
+afrglm=glm(miltcoup~oligarchy+pollib+parties+pctvote+popn + size, family=poisson,data=data_africa)
+
+summary(afrglm)$coefficients
+```
+We see that not all precictive variables are significant. The significant variables are oliarchy, pollib and parties. 
+
+**b)**
+Use the step down approach (using output of the functionsummary) to reduce the number of explanatoryvariables.  Compare the resulting model with your findings in a).
+```{r}
+afrglm=glm(miltcoup~oligarchy+pollib+parties+pctvote+popn + size, family=poisson,data=data_africa)
+
+summary(afrglm)$coefficients # Shows that size is the least significant
+
+afrglm2=glm(miltcoup~oligarchy+pollib+parties+pctvote+popn, family=poisson,data=data_africa)
+
+summary(afrglm2)$coefficients # Shows that popn is the least significant
+
+afrglm3=glm(miltcoup~oligarchy+pollib+parties+pctvote, family=poisson,data=data_africa)
+
+summary(afrglm3)$coefficients
+
+afrglm3=glm(miltcoup~oligarchy+pollib+parties, family=poisson,data=data_africa)
+
+
+```
+We see that after the step down method 3 variables are significantly influential instead of 2. Y = exp(-0.0937 + oliarchy * 0.0954 + pollib * -0.6666 + parties * 0.0256 + pctvote * 0.0121)
+
+```{r}
+m_oligarchy = mean(data_africa$oligarchy)
+m_parties = mean(data_africa$parties)
+m_pctvote = mean(data_africa$pctvote)
+
+exp(-0.0937 + m_oligarchy*0.0954 + 0*-0.6666 + m_parties*0.0256 + m_pctvote* 0.0121)
+exp(-0.0937 + m_oligarchy*0.0954 + 1*-0.6666 + m_parties*0.0256 + m_pctvote* 0.0121)
+exp(-0.0937 + m_oligarchy*0.0954 + 2*-0.6666 + m_parties*0.0256 + m_pctvote* 0.0121)
+
+```
+We see that the amount of coupes decrease when the pollitical liberalization increases
+
