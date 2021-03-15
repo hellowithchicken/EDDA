@@ -149,3 +149,45 @@ Looking at the above P-values for all possible interaction models, it seems that
 ```
 
 **f)** Is the second approach in e) wrong? Why or why not? Name both an advantage and a disadvantage of the two approaches, relative to each other.
+
+# Exercise 3
+
+**a)** Perform Poisson regression on the full data set africa, taking miltcoup as response variable, Comment on your findings.
+```{r}
+data_africa <- read.table(file="data/africa.txt", header=TRUE)
+
+# data_africa$pollib <- as.factor(data_africa$pollib)
+
+africa_glm <- glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec+numregim, family=poisson, data=data_africa)
+
+summary(africa_glm)
+```
+When inspecting the above summary of the poisson regression for the whole dataset with miltcoup as response variable, we see that only three variables show significant influence. Namely, oligarchy, pollib and parties show a <0.05 P-value. 
+
+? Do we need to initialize pollib as a factor variable ?
+
+**b)** Use the step down approach (using output of the function summary) to reduce the number of explanatory variables. Compare the resulting model with your findings in a). 
+```{r}
+
+africa_glm <- glm(miltcoup~oligarchy+pollib+parties, family=poisson, data=data_africa)
+
+summary(africa_glm)
+```
+
+Delete variable with highest insignificant p-value till model only contains significant variables:
+Delete numelec
+delete numregim
+delete size
+delete popn
+delete pctvote
+Done, model now only contains oligarchy, pollib and parties as significant explanatory variables with P-values < 0.05. These are the same variables that were also already significant with subquestion 3a. 
+
+If we have to factorize then also ignore pollib1 because of insignificance.
+
+**c)** Predict the number of coups for a hypothetical country for all the three levels of political liberalization and the averages (over all the counties in the data) of all the other (numerical) characteristics. Comment on your findings.
+```{r}
+Y = exp(-0.51+0.07-0.71+0.03+0.01+0.01-0.02+0.19); Y # Without factorization
+
+Y_2 = exp(-0.23+0.07-1.10-1.69+0.03+0.02+0.01+0-0.3+0.21); Y_2 # with factorization?
+```
+
