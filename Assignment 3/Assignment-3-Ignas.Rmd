@@ -201,11 +201,9 @@ From the test above we can conclude that both factors have a significant effect 
 An advantage of the contingency table in relative to the logistic regression is that the table is easy to read and gives a insight right away. The main advantage of a logistic regression is that non existing data can be used in order to forecast the outcome.
 
 
-#Exercise 3
+# Exercise 3
 
-To study the in
-uence of different political and geographical variables on the number of military coups, these
-data are collected for several Sub Saharan African countries in the file africa.txt. The meaning of the different variables:
+To study the influence of different political and geographical variables on the number of military coups, these data are collected for several Sub Saharan African countries in the file africa.txt. The meaning of the different variables:
 
 miltcoup - number of successful military coups from independence to 1989;
 oligarchy - number years country ruled by military oligarchy from independence to 1989;
@@ -226,21 +224,34 @@ poisson_model <- glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec
 summary(poisson_model)
 ```
 
+When inspecting the above summary of the poisson regression for the whole dataset with miltcoup as response variable, we see that only three variables show significant influence. Namely the variables oligarchy, pollib and parties show a P-value<0.05. For the pollib factor variable we also see that the pollib2 level (full civil rights) has a significant influence with in contrast to pollib1 (limited civil rights). Furthermore, de number of legislative and presidential elections (numelec) and the number of regime types seem to have the least influence on the number of coups.
+
 **b)** Use the step down approach (using output of the function summary) to reduce the number of explanatory variables. Compare the resulting model with your findings in a).
+```{r echo = T, results = 'hide'}
+# For every summary the variable with the highest P-value was excluded
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+
+              numelec+numregim,family=poisson,data=africa)) # remove numelec
+
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+
+              numregim,family=poisson,data=africa)) # remove numregim
+
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size,
+            family=poisson,data=africa)) # remove size
+
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn,
+            family=poisson,data=africa)) # remove popn
+
+summary(glm(miltcoup~oligarchy+pollib+parties+pctvote,
+            family=poisson,data=africa)) # remove pctvote
+```
+
 ```{r}
-summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec+numregim,family=poisson,data=africa)) # remove numelec
-
-summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numregim,family=poisson,data=africa)) # remove numregim
-
-summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size,family=poisson,data=africa)) # remove size
-
-summary(glm(miltcoup~oligarchy+pollib+parties+pctvote+popn,family=poisson,data=africa)) # remove popn
-
-summary(glm(miltcoup~oligarchy+pollib+parties+pctvote,family=poisson,data=africa)) # remove pctvote
-
-final_poisson <- glm(miltcoup~oligarchy+pollib+parties,family=poisson,data=africa) # final
+final_poisson <- glm(miltcoup~oligarchy+pollib+parties,
+                     family=poisson,data=africa) # final
 summary(final_poisson)
 ```
+
+In the final_poisson model we are left with the same three variables as were already flagged as significant at question 3a, namely: oligarchy, pollib and parties. And also again only one of the factor levels of pollib (pollib2) remains significant.
 
 **c)** Predict the number of coups for a hypothetical country for all the three levels of political liberalization and the averages (over all the counties in the data) of all the other (numerical) characteristics. Comment on your findings.
 
@@ -252,12 +263,14 @@ avg_oligarchy <- new_data$oligarchy; avg_parties <- new_data$parties;
 avg_pctvote <- new_data$pctvote; avg_popn <- new_data$popn;
 avg_size <- new_data$size; avg_numelec <- new_data$numelec;
 avg_numregim <- new_data$numregim
-# get a list of polical liberalization levels
-pollib <- as.character(unique(africa$pollib))
-new_data <- expand.grid(oligarchy = avg_oligarchy, pollib = pollib,
+
+# get a list of political liberalization levels
+pollib <- sort(as.character(unique(africa$pollib)))
+new_data <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
                         parties = avg_parties, pctvote = avg_pctvote,
                         popn = avg_popn, size = avg_size,
                         numelec = avg_numelec, numregim = avg_numregim)
+
 # full model
 results <- predict(poisson_model, new_data, type="response")
 final <- new_data %>% bind_cols(Prediction = results)
@@ -269,4 +282,5 @@ final <- new_data %>% bind_cols(Prediction = results)
 knitr::kable(final, caption = "Predictions with the reduced model")
 
 ```
+Looking at the predictions from both the full and the reduced model we see that the amount of expected coups decreases with higher levels of political liberalization. In both cases full civil rights (pollib = 2) predicts the lowest number of coups < 1. 
 
