@@ -271,14 +271,17 @@ new_data <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
                         popn = avg_popn, size = avg_size,
                         numelec = avg_numelec, numregim = avg_numregim)
 
+new_data_reduced <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
+                        parties = avg_parties)
+
 # full model
 results <- predict(poisson_model, new_data, type="response")
 final <- new_data %>% bind_cols(Prediction = results)
 knitr::kable(final, caption = "Predictions with the full model")
 
 # reduced model
-results <- predict(final_poisson, new_data, type="response")
-final <- new_data %>% bind_cols(Prediction = results)
+results <- predict(final_poisson, new_data_reduced, type="response")
+final <- new_data_reduced %>% bind_cols(Prediction = results)
 knitr::kable(final, caption = "Predictions with the reduced model")
 
 ```
