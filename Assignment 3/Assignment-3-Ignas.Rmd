@@ -134,15 +134,21 @@ On April 15, 1912, British passenger liner Titanic sank after colliding with an 
 
 **a)** Study the data and give a few (>1) summaries (graphics or tables).
 ```{r}
+par(mfrow=c(1,3))
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
-titanic$Survived <- as.factor(titanic$Survived)
+titanic$Survived = as.factor(titanic$Survived)
 qplot(x = Age, fill = Survived, data = titanic)
-qplot(x = PClass, data = titanic)
-qplot(x = Sex, data = titanic)
-qplot(x = Survived, fill = Sex, data = titanic)
-qplot(x = Survived, fill = PClass, data = titanic)
-qplot(x = Survived, y = Age, geom = "boxplot", data = titanic)
+qplot(x = PClass, fill = Survived, data = titanic)
+qplot(x = Sex,fill=Survived, data = titanic)
+titanic <- read.table(file="data/titanic.txt", header=TRUE)
+class_sex =  xtabs(~PClass+ Sex, data=titanic);class_sex
+tot = xtabs(Survived ~ PClass + Sex, data=titanic);tot
+round(tot/class_sex, 2)
 ```
+The histogram shows the ages of the passenger and whether or not they survived the Titanic accident or not. The two barplots show the survivors and perished people with respect to sex and class. We can see already here that the fraction of survivors in the first class is bigger than the 2nd and 3rd class and the fraction of survivors in the
+3rd class is the least. The barplot of the survivors with respect to the sex show that the fraction of male survivors is much less than female survivors. These fractions can also be seen in the tables which shows, categorized on class and sex, the the total amount of people on board of the titanic, the survivors and the fractions.
+
+
 **b)** Fit a logistic regression model (no interactions yet) to investigate the association between the survival status and the predictors PClass, Age and Sex. Interpret the results in terms of odds, comment.
 
 ```{r}
@@ -150,8 +156,15 @@ qplot(x = Survived, y = Age, geom = "boxplot", data = titanic)
 titanic$PClass <- as.factor(titanic$PClass)
 titanic$Sex <- as.factor(titanic$Sex)
 logistic <- glm(Survived~PClass+Age+Sex, data = titanic, family = binomial)
-summary(logistic)
+summary(logistic)$coefficients
+drop1(logistic,test="Chisq")
+odds_male_example =  exp(3.7597 + 1 * -1.2920 + 0 * -2.5214 + 1 * -2.6314 + 25 * -0.0392)
+odds_male_example
+odds_female_example =  exp(3.7597 + 0 * -1.2920 + 0 * -2.5214 + 0 * -2.6314 + 25 * -0.0392)
+odds_female_example
 ```
+The odds can be defined as the probability of success devided by the probability of failure. The summary show that the odds of surviving is exp(3.7597 + PClass2nd * -1.2920 + PClass3rd * -2.5214 + Sexmale * -2.6314 + age * -0.0392). This means that the odds of survival while being a female in the first class is  exp(3.7597 + age * -0.0392). This shows that the odds of survival for a man who is 25 years old in the 2nd class is 0.319. While a woman who is in the first class and has a age of 25 has the odds of survival of 16.1. The drop1 table also shows that all estimators are significant.
+
 **c)** Investigate for interaction of predictor Age with factors PClass and Sex. From this and b), choose (and justify) a resulting model. For this model, report the estimate for the probability of survival for each combination of levels of the factors PClass and Sex for a person of age 53. d) Propose a method to predict the survival status and a quality measure for your prediction
 
 ```{r}
@@ -181,9 +194,12 @@ new_model <- glm(Survived~PClass+Sex, data = titanic, family = binomial)
 drop1(new_model,test="Chisq")
 ```
 
-From the test above we can conclude that both factors have a significant effect on the survival outcome.
+From the test above we can conclude that both factors have a significant effect on the survival outcome. 
 
 **f)** Is the second approach in e) wrong? Why or why not? Name both an advantage and a disadvantage of the two approaches, relative to each other.
+
+An advantage of the contingency table in relative to the logistic regression is that the table is easy to read and gives a insight right away. The main advantage of a logistic regression is that non existing data can be used in order to forecast the outcome.
+
 
 #Exercise 3
 
