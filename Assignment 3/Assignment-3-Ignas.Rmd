@@ -10,6 +10,7 @@ library(tidyverse)
 library(rstudioapi)
 library(lme4)
 library(car)
+library(gridExtra)
 
 knitr::opts_chunk$set(echo = TRUE)
 setwd(dirname(getActiveDocumentContext()$path))
@@ -23,39 +24,33 @@ options(digits = 3)
 To investigate the effect of sexual activity on longevity of fruit flies, 75 male fruit flies were divided randomly in three groups of 25. The fruit flies in the first group were kept solitary, those in the second were kept together with one virgin female fruit fly per day, and those in the third group were kept together with eight virgin female fruit flies a day. In the data-file fruitflies.txt the three groups are labelled isolated, low and high. The number of days until death (longevity) was measured for all flies. Later, it was decided to measure also the length of their thorax. Add a column loglongevity to the data-frame, containing the logarithm of the number of days until death. Use this as the response variable in the following.
 
 **a)** Make an informative plot of the data. Investigate whether sexual activity influences longevity by performing a statistical test, without taking the thorax length into account. What are the estimated longevities for the three conditions? Comment.
-```{r, fig.width = 4, fig.height=4}
+```{r, fig.width = 12, fig.height=6}
 data_flies <- read.table(file="data/fruitflies.txt", header=TRUE)
 data_flies$activity <- as.factor(data_flies$activity)
 # add loglongevity
-data_flies <- data_flies %>% mutate(loglongevity = log10(longevity))
+data_flies <- data_flies %>% mutate(loglongevity = log(longevity))
 # make informative plot - boxplot
+par(mfrow=c(1,2));
 plot(data_flies$loglongevity~data_flies$activity)
+plot(loglongevity~thorax,pch=as.character(activity), data=data_flies)
 ```
+From the boxplot we can see that there could be a significant difference in the means of loglongevity for high sexual activity level. In the scatter plot on the right there seems to be a positive relationship between thorax and loglongevity, however any clear influence of the sexual activity level can not be observed.
 ```{r, fig.width = 12, fig.height=6}
 # perform test to see if sexual activity has an effect on longevity
 model <- lm(loglongevity~activity, data = data_flies) # prepare model
 par(mfrow=c(1,2)); plot(model, 1); plot(model, 2) # investigate normality
 anova(model); summary(model)$coefficients
 ```
-One-way ANOVA was performed to investigate whether sexual activity has an effect on loglongevity. From the results we can see that the p-values < 0.05 meaning that sexual activity level significantly influences loglongevity. From the summary table we can see that all estimates are significantly different from 0: for high sexual activity the estimate is 1.5644, for isolated it is 1.5644 + 0.2246 = 1.7890 and low it is 1.5644 + 0.1727 = 1.7371.
+One-way ANOVA was performed to investigate whether sexual activity has an effect on loglongevity. From the results we can see that the p-values < 0.05 meaning that sexual activity level significantly influences loglongevity. From the summary table we can see that all estimates are significantly different from 0: for high sexual activity the estimate is 3.602, for isolated it is 3.602 + 0.517 = 4.119 and for low it is 3.602 + 0.398 = 4.
 
 Test diagnostics: no relationship can be observed in the residuals vs fitted plot. QQ-plot seems to follow a straigt line, however there are some outliers at the extremes.
 
 **b)** Investigate whether sexual activity influences longevity by performing a statistical test, now including thorax length as an explanatory variable into the analysis. Does sexual activity increase or decrease longevity? What are the estimated longevities for the three groups, for a fly with average thorax length?
 
 ```{r, fig.width = 12, fig.height=6}
-# perform ANCOVA with interaction analysis
-model_interaction <- lm(loglongevity~thorax*activity, data = data_flies) # prepare model
-par(mfrow=c(1,2)); plot(model_interaction , 1); plot(model_interaction , 2) # investigate normality
-anova(model_interaction)
-```
-First we investigate if there is any significant interaction between thorax and sexual activity level by performing ANCOVA with interaction (diagnostics show that data follows the required assumptions). From the results we can see that the interaction factor is insignificant and can be ignored, therefore we can now use the additive ANCOVA model.
-
-```{r, fig.width = 12, fig.height=6}
 # perform additive ANCOVA analysis
-model <- lm(loglongevity~thorax+activity, data = data_flies) # prepare model
-par(mfrow=c(1,2)); plot(model , 1); plot(model , 2) # investigate normality
-anova(model); table <- summary(model)$coefficients; table
+model_1 <- lm(loglongevity~thorax+activity, data = data_flies) # prepare model
+anova(model_1); table <- summary(model_1)$coefficients; table
 # extract model's parameter
 intercept <- table[,1][1]; beta <- table[,1][2]
 alpha_high <- 0; alpha_low <- table[,1][4]
@@ -63,18 +58,16 @@ alpha_isolated <- table[,1][3]
 # calculate mean thorax
 mean_thorax <- mean(data_flies$thorax)
 # calculate estimates
-estimate_high <- 10**(intercept + alpha_high + beta * mean_thorax)
-estimate_low <- 10**(intercept + alpha_low + beta * mean_thorax)
-estimate_isolated <- 10**(intercept + alpha_isolated + beta * mean_thorax)
+estimate_high <- exp(1)**(intercept + alpha_high + beta * mean_thorax)
+estimate_low <- exp(1)**(intercept + alpha_low + beta * mean_thorax)
+estimate_isolated <- exp(1)**(intercept + alpha_isolated + beta * mean_thorax)
 estimates <- c(estimate_isolated, estimate_low, estimate_high)
 activity_levels <- unique(as.character(data_flies$activity))
 knitr::kable(data.frame(Activity = activity_levels,
                            `Longevity estimate` = estimates),
              caption = "Longevity estimates for average thorax fruit fly")
 ```
-Model diagnostics: There does not seem to be any obvious relationship in the Residuals vs Fitted plot. The qq-plot does not follow a straight line well, its shape resembles a letter S, therefore the normality here is questionable.
-
-From the ANCOVA analysis results above, we can see that sexual activity has a significant effect (p-values < 0.05) on the loglongevity. From the estimates in the summary table, we can see that sexual activity decreases longevity of the fruit flies - the estimates from isolated and low sexual activity levels are positive with isolated having the highest estimate. Longevity estimates for average thorax fruit fly were estimated by calculating average thorax length ($X$) and extracting intercept ($\mu$), $\beta$ and $\alpha$ parameters from the model summary table - the values there plugged into the formula below:
+From the ANCOVA analysis results above, we can see that sexual activity has a significant effect (p-values < 0.05) on the loglongevity. From the estimates in the summary table, we can see that sexual activity decreases longevity of the fruit flies - the estimates from isolated and low sexual activity levels are positive with isolated having the highest estimate. Longevity estimates for average thorax fruit fly were estimated by calculating average thorax length ($X$) and extracting intercept ($\mu$), $\beta$ and $\alpha$ parameters from the model summary table - the values were plugged into the formula below:
 
 $$Y \approx \mu + \alpha + \beta X$$
 
@@ -89,13 +82,28 @@ for (i in activity_levels) {
             ,data=data_flies[data_flies$activity==i,]))}
 ```
 
-From the plot above we can see a positive relationship between thorax and longevity. To investigate if this relationship is similar between different sexual activity levels, we need to estimate whether the $\beta$ parameter (slope) is different between sexual activity levels. From the plot above it is not obvious if this is the case, the slopes look very similar. To concretely say if the slopes are the same we need to perform an ANCOVA analysis with interaction. This was already done in $b)$ where we concluded that there is no significant interaction between thorax and sexual activity level, therefore the slope parameter can be regarded as the same between sexual activity levels.
+From the plot above we can see a positive relationship between thorax and longevity. 
+
+```{r, fig.width = 12, fig.height=6}
+# perform ANCOVA with interaction analysis
+model_interaction <- lm(loglongevity~thorax*activity, data = data_flies) # prepare model
+par(mfrow=c(1,2)); plot(model_interaction , 1); plot(model_interaction , 2) # investigate normality
+anova(model_interaction)
+```
+
+To investigate if this relationship is similar between different sexual activity levels, we need to estimate whether the $\beta$ parameter (slope) is different between sexual activity levels. From the plot it is not obvious if this is the case - the slopes look very similar. To concretely say if the slopes are the same we performed an ANCOVA analysis with interaction. From the results we can see that the interaction factor is insignificant (p-value > 0.05) and can be ignored. Therefore, the slope parameter can be regarded as the same between different sexual activity levels.
 
 **d)** Which of the two analyses, without or with thorax length, do you prefer? Is one of the analyses wrong?
 
+Analysis with thorax length is preferable. From the results in $b)$ we can see that thorax has a significant influence on the outcome of longevity, therefore it can not be ignored. By performing one-way ANOVA we ignore this influence as it gets absorbed into the single factor of sexual activity level.
+
 **e)** Verify normality and heteroscedasticity by making a normal QQ-plot of the residuals, and a residuals versus fitted plot, for the analysis that includes thorax length.
 
-All the diagnostics were performed in $b)$
+```{r, fig.width = 12, fig.height=6}
+par(mfrow=c(1,2)); plot(model_1 , 1); plot(model_1 , 2) # investigate normality
+```
+
+There does not seem to be any obvious relationship in the Residuals vs Fitted plot. The qq-plot does not follow a straight line well, its shape resembles a letter S, therefore the normality here is questionable.
 
 **f)** Perform the ancova analysis with the number of days as the response, rather than its logarithm. Verify normality and homoscedasticity of the residuals of this analysis. Was it wise to use the logarithm as response?
 
@@ -125,22 +133,26 @@ The model above brings us to the same conclusion as the model used in $b)$: ther
 par(mfrow=c(1,2)); plot(model , 1); plot(model , 2) # investigate normality
 ```
 
-QQ-plot seems to be following a straight line better than the additive model with loglongevity. No obvious relationship can be observed in the Residuals vs Fitted plot and there seems to be less movement here than in the model with loglongevity. Based on the diagnostics, this model with regular longevity better follows the required assumptions, therefore it was not a wise choice to use the logarithmic response.
+QQ-plot seems to be following a straight line better than the additive model with loglongevity. No obvious relationship can be observed in the Residuals vs Fitted plot and there seems to be less movement here than in the model with loglongevity. Based on the diagnostics, this model with regular longevity better follows the required assumptions. However, the model with non-logarithmic longevity produces a model with a negative intercept which does not make sense conceptually, therefore it was wise to use the logarithmic longevity.
 
 # Exercise 2
 
 On April 15, 1912, British passenger liner Titanic sank after colliding with an iceberg. There were not enough lifeboats for everyone onboard, resulting in the death of 1502 out of 2224 passengers and crew. The data file titanic.txt gives the survival status of passengers on the Titanic, together with their names, age, sex and passenger class. (About half of the ages for the 3rd class passengers are missing, although many of these could be filled in from the original source.) The columns: Name { name of passenger; PClass - passenger class (1st, 2nd or 3rd), Age - age in years, Sex - male or female, Survived - survival status (1=Yes or 0=No).
 
 **a)** Study the data and give a few (>1) summaries (graphics or tables).
-```{r}
-
+<<<<<<< HEAD
+```{r, warning=F}
+par(mfrow=c(1,3))
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
 titanic$Survived = as.factor(titanic$Survived)
-par(mfrow=c(1,3));qplot(x = Age, fill = Survived, data = titanic);qplot(x = PClass, fill = Survived, data = titanic);qplot(x = Sex,fill=Survived, data = titanic)
+plot1 <- qplot(x = Age, fill = Survived, data = titanic, show.legend = FALSE)
+plot2 <- qplot(x = PClass, fill = Survived, data = titanic, show.legend = FALSE)
+plot3 <- qplot(x = Sex,fill=Survived, data = titanic)
+grid.arrange(plot1, plot2, plot3, ncol=3)
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
-class_sex =  xtabs(~PClass+ Sex, data=titanic);class_sex
-tot = xtabs(Survived ~ PClass + Sex, data=titanic);tot
-round(tot/class_sex, 2)
+class_sex =  xtabs(~PClass+ Sex, data=titanic);knitr::kable(class_sex)
+tot = xtabs(Survived ~ PClass + Sex, data=titanic);knitr::kable(tot)
+knitr::kable(round(tot/class_sex, 2))
 ```
 The histogram shows the ages of the passenger and whether or not they survived the Titanic accident or not. The two barplots show the survivors and perished people with respect to sex and class. We can see already here that the fraction of survivors in the first class is bigger than the 2nd and 3rd class and the fraction of survivors in the
 3rd class is the least. The barplot of the survivors with respect to the sex show that the fraction of male survivors is much less than female survivors. These fractions can also be seen in the tables which shows, categorized on class and sex, the the total amount of people on board of the titanic, the survivors and the fractions.
@@ -162,41 +174,75 @@ odds_female_example
 ```
 The odds can be defined as the probability of success devided by the probability of failure. The summary show that the odds of surviving is exp(3.7597 + PClass2nd * -1.2920 + PClass3rd * -2.5214 + Sexmale * -2.6314 + age * -0.0392). This means that the odds of survival while being a female in the first class is  exp(3.7597 + age * -0.0392). This shows that the odds of survival for a man who is 25 years old in the 2nd class is 0.319. While a woman who is in the first class and has a age of 25 has the odds of survival of 16.1. The drop1 table also shows that all estimators are significant.
 
-**c)** Investigate for interaction of predictor Age with factors PClass and Sex. From this and b), choose (and justify) a resulting model. For this model, report the estimate for the probability of survival for each combination of levels of the factors PClass and Sex for a person of age 53. d) Propose a method to predict the survival status and a quality measure for your prediction
+**c)** Investigate for interaction of predictor Age with factors PClass and Sex. From this and b), choose (and justify) a resulting model. For this model, report the estimate for the probability of survival for each combination of levels of the factors PClass and Sex for a person of age 53.
+
 
 ```{r}
-logistic_interaction <- glm(Survived~PClass*Age*Sex, data = titanic, family = binomial)
-summary(logistic_interaction)$coefficients
+# interaction of sex and age
+logistic_interaction_sex <- glm(Survived~Age*Sex, data = titanic, family = binomial)
+summary(logistic_interaction_sex)$coefficients
 
-# predict for 53 years and all PClass
+# interaction of PClass and age
+logistic_interaction_pclass <- glm(Survived~Age*PClass, data = titanic, family = binomial)
+summary(logistic_interaction_pclass)$coefficients
+```
+
+Two logistic regressions with interaction were performed to investiagte the interaction between Age-Sex and Age-PClass. Significant interaction was found between Age and Sex, therefore it will be added to the model. No significant interaction between Age and PClass was identified.
+
+```{r}
+# add the interaction term
+logistic_interaction_1 <- glm(Survived~PClass+Age+Sex+Age:Sex, data = titanic, family = binomial) # remove Age
+
+logistic_interaction_2 <- glm(Survived~PClass+Sex+Age:Sex, data = titanic, family = binomial) # remove Sex
+
+logistic_interaction_final <- glm(Survived~PClass+Age:Sex, data = titanic, family = binomial)
+summary(logistic_interaction_final)$coefficients
+```
+
+After adding the interaction term into the model (PClass+Age+Sex+Age:Sex) we observed that Sex and Age were no longer significant variables, therefore they were removed from the model. The resulting model - PClass+Age:Sex - is the final model we chose. This is the preferred model over the one used in $b)$ as that model ignores significant interaction of the variables.
+
+```{r}
+# predict for 53 years and all PClass, Sex
 classes <- as.character(unique(titanic$PClass))
 sexes <- as.character(unique(titanic$Sex))
 age <- 53
 new_data <- expand.grid(PClass = classes, Sex = sexes, Age = age)
-results <- predict(logistic, new_data, type="response")
+results <- predict(logistic_interaction_final, new_data, type="response")
 final <- new_data %>% bind_cols(Survival = results)
 knitr::kable(final)
 ```
-
-From the model above we do not see any significant interaction between predictors, therefore we choose the model from $b)$.
+The survival predictions for a 53 year-old passenger of all PClass and Sex can be observed above.  
 
 **d)** Propose a method to predict the survival status and a quality measure for your prediction and describe how you would implement that method (you do not need to implement it).
 
-Split data into training and testing data. Train the logistic regression model on the training data and then use this model to predict the outcomes of the unseen, testing data. Percentage correct could be the quality measure for the model.
+Split data into training and testing data. Train the logistic regression model on the training data and then use this model to predict the outcomes of the unseen, testing data. Set a threshold for the odds outcome of success/fail - percentage correct could be the quality measure for the model.
 
 **e)** Another approach would be to apply a contingency table test to investigate whether factor passenger class (and gender) has an effect on the survival status. Implement the relevant test(s).
 
 ```{r}
-new_model <- glm(Survived~PClass+Sex, data = titanic, family = binomial)
-drop1(new_model,test="Chisq")
+# Makes a contingency table and chi-squared test for survived with class and gender
+tab1 = table(titanic$Survived,titanic$Sex)
+chisq.test(tab1)
+total_s= rowSums(rbind(tab1,NaN));total_g = colSums(tab1);
+tab1 = rbind(tab1,total_g);tab1 = cbind(tab1,total_s)
+knitr::kable(tab1)
+
+
+tab2 = table(titanic$Survived,titanic$PClass)
+chisq.test(tab2)
+total_c= rowSums(rbind(tab2,NaN));total_g = colSums(tab2);
+tab2 = rbind(tab2,total_g);tab2 = cbind(tab2,total_s)
+knitr::kable(tab2)
+
 ```
 
 From the test above we can conclude that both factors have a significant effect on the survival outcome. 
 
 **f)** Is the second approach in e) wrong? Why or why not? Name both an advantage and a disadvantage of the two approaches, relative to each other.
 
-An advantage of the contingency table in relative to the logistic regression is that the table is easy to read and gives a insight right away. The main advantage of a logistic regression is that non existing data can be used in order to forecast the outcome.
+The second approach is not necessary wrong as we want to know whether or not the Survived variable is independent of the variables gender and class. The approach in e (the contingency table with the chi-squared test) is for that question suitable. 
 
+Whether you want to use the contingency table with the chi-squared test depends generally on which question we want to answer. A advantage of the Chi-squared is that the test can be used when we want to know if the reason that a person survived is independent of their sex or class, as mentioned above. While the logistic regression has the advantage that it could compute the probability that a person with a certain, age, class and gender survives or not. 
 
 # Exercise 3
 
@@ -271,15 +317,9 @@ new_data <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
 new_data_reduced <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
                         parties = avg_parties)
 
-# full model
-results <- predict(poisson_model, new_data, type="response")
-final <- new_data %>% bind_cols(Prediction = results)
-knitr::kable(final, caption = "Predictions with the full model")
-
-# reduced model
 results <- predict(final_poisson, new_data_reduced, type="response")
 final <- new_data_reduced %>% bind_cols(Prediction = results)
-knitr::kable(final, caption = "Predictions with the reduced model")
+knitr::kable(final, caption = "Predictions with the model from b)")
 
 ```
 Looking at the predictions from both the full and the reduced model we see that the amount of expected coups decreases with higher levels of political liberalization. In both cases full civil rights (pollib = 2) predicts the lowest number of coups < 1. 
