@@ -10,6 +10,7 @@ library(tidyverse)
 library(rstudioapi)
 library(lme4)
 library(car)
+library(gridExtra)
 
 knitr::opts_chunk$set(echo = TRUE)
 setwd(dirname(getActiveDocumentContext()$path))
@@ -140,13 +141,14 @@ QQ-plot seems to be following a straight line better than the additive model wit
 On April 15, 1912, British passenger liner Titanic sank after colliding with an iceberg. There were not enough lifeboats for everyone onboard, resulting in the death of 1502 out of 2224 passengers and crew. The data file titanic.txt gives the survival status of passengers on the Titanic, together with their names, age, sex and passenger class. (About half of the ages for the 3rd class passengers are missing, although many of these could be filled in from the original source.) The columns: Name { name of passenger; PClass - passenger class (1st, 2nd or 3rd), Age - age in years, Sex - male or female, Survived - survival status (1=Yes or 0=No).
 
 **a)** Study the data and give a few (>1) summaries (graphics or tables).
-```{r}
+```{r, warning=F}
 par(mfrow=c(1,3))
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
 titanic$Survived = as.factor(titanic$Survived)
-qplot(x = Age, fill = Survived, data = titanic)
-qplot(x = PClass, fill = Survived, data = titanic)
-qplot(x = Sex,fill=Survived, data = titanic)
+plot1 <- qplot(x = Age, fill = Survived, data = titanic, show.legend = FALSE)
+plot2 <- qplot(x = PClass, fill = Survived, data = titanic, show.legend = FALSE)
+plot3 <- qplot(x = Sex,fill=Survived, data = titanic)
+grid.arrange(plot1, plot2, plot3, ncol=3)
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
 class_sex =  xtabs(~PClass+ Sex, data=titanic);class_sex
 tot = xtabs(Survived ~ PClass + Sex, data=titanic);tot
@@ -175,20 +177,40 @@ The odds can be defined as the probability of success devided by the probability
 **c)** Investigate for interaction of predictor Age with factors PClass and Sex. From this and b), choose (and justify) a resulting model. For this model, report the estimate for the probability of survival for each combination of levels of the factors PClass and Sex for a person of age 53.
 
 ```{r}
-logistic_interaction <- glm(Survived~PClass*Age*Sex, data = titanic, family = binomial)
-summary(logistic_interaction)$coefficients
+# interaction of sex and age
+logistic_interaction_sex <- glm(Survived~Age*Sex, data = titanic, family = binomial)
+summary(logistic_interaction_sex)$coefficients
 
-# predict for 53 years and all PClass
+# interaction of PClass and age
+logistic_interaction_pclass <- glm(Survived~Age*PClass, data = titanic, family = binomial)
+summary(logistic_interaction_pclass)$coefficients
+```
+
+Two logistic regressions with interaction were performed to investiagte the interaction between Age-Sex and Age-PClass. Significant interaction was found between Age and Sex, therefore it will be added to the model. No significant interaction between Age and PClass was identified.
+
+```{r}
+# add the interaction term
+logistic_interaction_1 <- glm(Survived~PClass+Age+Sex+Age:Sex, data = titanic, family = binomial) # remove Age
+
+logistic_interaction_2 <- glm(Survived~PClass+Sex+Age:Sex, data = titanic, family = binomial) # remove Sex
+
+logistic_interaction_final <- glm(Survived~PClass+Age:Sex, data = titanic, family = binomial)
+summary(logistic_interaction_final)$coefficients
+```
+
+After adding the interaction term into the model (PClass+Age+Sex+Age:Sex) we observed that Sex and Age were no longer significant variables, therefore they were removed from the model. The resulting model - PClass+Age:Sex - is the final model we chose. This is the preferred model over the one used in $b)$ as that model ignores significant interaction of the variables.
+
+```{r}
+# predict for 53 years and all PClass, Sex
 classes <- as.character(unique(titanic$PClass))
 sexes <- as.character(unique(titanic$Sex))
 age <- 53
 new_data <- expand.grid(PClass = classes, Sex = sexes, Age = age)
-results <- predict(logistic, new_data, type="response")
+results <- predict(logistic_interaction_final, new_data, type="response")
 final <- new_data %>% bind_cols(Survival = results)
 knitr::kable(final)
 ```
-
-From the model above we do not see any significant interaction between predictors, therefore we choose the model from $b)$.
+The survival predictions for a 53 year-old passenger of all PClass and Sex can be observed above.  
 
 **d)** Propose a method to predict the survival status and a quality measure for your prediction and describe how you would implement that method (you do not need to implement it).
 
@@ -281,15 +303,9 @@ new_data <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
 new_data_reduced <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
                         parties = avg_parties)
 
-# full model
-results <- predict(poisson_model, new_data, type="response")
-final <- new_data %>% bind_cols(Prediction = results)
-knitr::kable(final, caption = "Predictions with the full model")
-
-# reduced model
 results <- predict(final_poisson, new_data_reduced, type="response")
 final <- new_data_reduced %>% bind_cols(Prediction = results)
-knitr::kable(final, caption = "Predictions with the reduced model")
+knitr::kable(final, caption = "Predictions with the model from b)")
 
 ```
 Looking at the predictions from both the full and the reduced model we see that the amount of expected coups decreases with higher levels of political liberalization. In both cases full civil rights (pollib = 2) predicts the lowest number of coups < 1. 
