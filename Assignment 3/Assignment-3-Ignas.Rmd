@@ -35,7 +35,6 @@ plot(data_flies$loglongevity~data_flies$activity)
 # perform test to see if sexual activity has an effect on longevity
 model <- lm(loglongevity~activity, data = data_flies) # prepare model
 par(mfrow=c(1,2)); plot(model, 1); plot(model, 2) # investigate normality
-# perform one-way ANOVA
 anova(model); summary(model)$coefficients
 ```
 One-way ANOVA was performed to investigate whether sexual activity has an effect on loglongevity. From the results we can see that the p-values < 0.05 meaning that sexual activity level significantly influences loglongevity. From the summary table we can see that all estimates are significantly different from 0: for high sexual activity the estimate is 1.5644, for isolated it is 1.5644 + 0.2246 = 1.7890 and low it is 1.5644 + 0.1727 = 1.7371.
@@ -134,12 +133,10 @@ On April 15, 1912, British passenger liner Titanic sank after colliding with an 
 
 **a)** Study the data and give a few (>1) summaries (graphics or tables).
 ```{r}
-par(mfrow=c(1,3))
+
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
 titanic$Survived = as.factor(titanic$Survived)
-qplot(x = Age, fill = Survived, data = titanic)
-qplot(x = PClass, fill = Survived, data = titanic)
-qplot(x = Sex,fill=Survived, data = titanic)
+par(mfrow=c(1,3));qplot(x = Age, fill = Survived, data = titanic);qplot(x = PClass, fill = Survived, data = titanic);qplot(x = Sex,fill=Survived, data = titanic)
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
 class_sex =  xtabs(~PClass+ Sex, data=titanic);class_sex
 tot = xtabs(Survived ~ PClass + Sex, data=titanic);tot
