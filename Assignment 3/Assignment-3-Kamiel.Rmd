@@ -119,7 +119,6 @@ The histogram shows the ages on board, while the first The table shows the total
 **(b)** Fit a logistic regression model (no interactions yet) to investigate the association between the survival status and the predictors  PClass,Age and Sex.  Interpret the results in terms of odds, comment
 ```{r}
 titanicglm=glm(Survived~PClass+Sex+age,data=data_titanic,family=binomial)
-titanicglm=glm(Survived~PClass,data=data_titanic,family=binomial)
 titanicglm
 summary(titanicglm)$coefficients
 
@@ -172,6 +171,7 @@ An advantage of the contingency table in relative to the logistic regression is 
 
 ```{r}
 data_africa <- read.table(file="data/africa.txt", header=TRUE)
+data_africa
 
 afrglm=glm(miltcoup~oligarchy+pollib+parties+pctvote+popn + size, family=poisson,data=data_africa)
 
