@@ -29,19 +29,17 @@ data_flies <- read.table(file="data/fruitflies.txt", header=TRUE)
 data_flies$activity <- as.factor(data_flies$activity)
 # add loglongevity
 data_flies <- data_flies %>% mutate(loglongevity = log(longevity))
-# make informative plot - boxplot
-par(mfrow=c(1,2));
-plot(data_flies$loglongevity~data_flies$activity)
+# make informative plot
 plot(loglongevity~thorax,pch=as.character(activity), data=data_flies)
 ```
-From the boxplot we can see that there could be a significant difference in the means of loglongevity for high sexual activity level. In the scatter plot on the right there seems to be a positive relationship between thorax and loglongevity, however any clear influence of the sexual activity level can not be observed.
+In the scatter plot there seems to be a positive relationship between thorax and loglongevity, however any obvious influence of the sexual activity level can not be observed.
 ```{r, fig.width = 12, fig.height=6}
 # perform test to see if sexual activity has an effect on longevity
 model <- lm(loglongevity~activity, data = data_flies) # prepare model
 par(mfrow=c(1,2)); plot(model, 1); plot(model, 2) # investigate normality
 anova(model); summary(model)$coefficients
 ```
-One-way ANOVA was performed to investigate whether sexual activity has an effect on loglongevity. From the results we can see that the p-values < 0.05 meaning that sexual activity level significantly influences loglongevity. From the summary table we can see that all estimates are significantly different from 0: for high sexual activity the estimate is 3.602, for isolated it is 3.602 + 0.517 = 4.119 and for low it is 3.602 + 0.398 = 4.
+One-way ANOVA was performed to investigate whether sexual activity has an effect on loglongevity. From the results we can see that the p-value < 0.05 meaning that sexual activity level significantly influences loglongevity. From the summary table we can see that all estimates are significantly different from 0: for high sexual activity the estimate is exp(3.602), for isolated it is exp(3.602 + 0.517) = exp(4.119) and for low it is exp(3.602 + 0.398) = exp(4).
 
 Test diagnostics: no relationship can be observed in the residuals vs fitted plot. QQ-plot seems to follow a straigt line, however there are some outliers at the extremes.
 
@@ -86,7 +84,7 @@ From the plot above we can see a positive relationship between thorax and longev
 
 ```{r, fig.width = 12, fig.height=6}
 # perform ANCOVA with interaction analysis
-model_interaction <- lm(loglongevity~thorax*activity, data = data_flies) # prepare model
+model_interaction <- lm(loglongevity~activity*thorax, data = data_flies) # prepare model
 par(mfrow=c(1,2)); plot(model_interaction , 1); plot(model_interaction , 2) # investigate normality
 anova(model_interaction)
 ```
@@ -133,14 +131,13 @@ The model above brings us to the same conclusion as the model used in $b)$: ther
 par(mfrow=c(1,2)); plot(model , 1); plot(model , 2) # investigate normality
 ```
 
-QQ-plot seems to be following a straight line better than the additive model with loglongevity. No obvious relationship can be observed in the Residuals vs Fitted plot and there seems to be less movement here than in the model with loglongevity. Based on the diagnostics, this model with regular longevity better follows the required assumptions. However, the model with non-logarithmic longevity produces a model with a negative intercept which does not make sense conceptually, therefore it was wise to use the logarithmic longevity.
+QQ-plot seems to be following a straight line better than the additive model with loglongevity. No obvious relationship can be observed in the Residuals vs Fitted plot and there seems to be less movement here than in the model with loglongevity. Based on the diagnostics, this model with regular longevity better follows the required assumptions. Therefore, it was not wise to logaritmicaly transform longevity.
 
 # Exercise 2
 
 On April 15, 1912, British passenger liner Titanic sank after colliding with an iceberg. There were not enough lifeboats for everyone onboard, resulting in the death of 1502 out of 2224 passengers and crew. The data file titanic.txt gives the survival status of passengers on the Titanic, together with their names, age, sex and passenger class. (About half of the ages for the 3rd class passengers are missing, although many of these could be filled in from the original source.) The columns: Name { name of passenger; PClass - passenger class (1st, 2nd or 3rd), Age - age in years, Sex - male or female, Survived - survival status (1=Yes or 0=No).
 
 **a)** Study the data and give a few (>1) summaries (graphics or tables).
-<<<<<<< HEAD
 ```{r, warning=F}
 par(mfrow=c(1,3))
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
@@ -172,7 +169,7 @@ odds_male_example
 odds_female_example =  exp(3.7597 + 0 * -1.2920 + 0 * -2.5214 + 0 * -2.6314 + 25 * -0.0392)
 odds_female_example
 ```
-The odds can be defined as the probability of success devided by the probability of failure. The summary show that the odds of surviving is exp(3.7597 + PClass2nd * -1.2920 + PClass3rd * -2.5214 + Sexmale * -2.6314 + age * -0.0392). This means that the odds of survival while being a female in the first class is  exp(3.7597 + age * -0.0392). This shows that the odds of survival for a man who is 25 years old in the 2nd class is 0.319. While a woman who is in the first class and has a age of 25 has the odds of survival of 16.1. The drop1 table also shows that all estimators are significant.
+The odds can be defined as the probability of success devided by the probability of failure. The summary show that the odds of surviving is exp(3.7597 + PClass2nd * -1.2920 + PClass3rd * -2.5214 + Sexmale * -2.6314 + age * -0.0392). This means that the odds of survival while being a female in the first class is  exp(3.7597 + age * -0.0392). This shows that the odds of survival for a man who is 25 years old in the 2nd class is 0.319. While a woman who is in the first class and has an age of 25 has the odds of survival of 16.1. The drop1 table also shows that all estimators are significant.
 
 **c)** Investigate for interaction of predictor Age with factors PClass and Sex. From this and b), choose (and justify) a resulting model. For this model, report the estimate for the probability of survival for each combination of levels of the factors PClass and Sex for a person of age 53.
 
@@ -187,13 +184,15 @@ logistic_interaction_pclass <- glm(Survived~Age*PClass, data = titanic, family =
 summary(logistic_interaction_pclass)$coefficients
 ```
 
-Two logistic regressions with interaction were performed to investiagte the interaction between Age-Sex and Age-PClass. Significant interaction was found between Age and Sex, therefore it will be added to the model. No significant interaction between Age and PClass was identified.
+Two logistic regressions with interaction were performed to investigate the interaction between Age-Sex and Age-PClass. Significant interaction was found between Age and Sex, therefore it will be added to the model. No significant interaction between Age and PClass was identified.
 
 ```{r}
 # add the interaction term
-logistic_interaction_1 <- glm(Survived~PClass+Age+Sex+Age:Sex, data = titanic, family = binomial) # remove Age
+logistic_interaction_1 <- glm(Survived~PClass+Age+Sex+Age:Sex, data = titanic,
+                              family = binomial) # remove Age
 
-logistic_interaction_2 <- glm(Survived~PClass+Sex+Age:Sex, data = titanic, family = binomial) # remove Sex
+logistic_interaction_2 <- glm(Survived~PClass+Sex+Age:Sex, data = titanic,
+                              family = binomial) # remove Sex
 
 logistic_interaction_final <- glm(Survived~PClass+Age:Sex, data = titanic, family = binomial)
 summary(logistic_interaction_final)$coefficients
@@ -215,7 +214,7 @@ The survival predictions for a 53 year-old passenger of all PClass and Sex can b
 
 **d)** Propose a method to predict the survival status and a quality measure for your prediction and describe how you would implement that method (you do not need to implement it).
 
-Split data into training and testing data. Train the logistic regression model on the training data and then use this model to predict the outcomes of the unseen, testing data. Set a threshold for the odds outcome of success/fail - percentage correct could be the quality measure for the model.
+Split data into training and testing data. Train the logistic regression model on the training data and then use this model to predict the outcomes of the unseen, testing data. Set a threshold for the probability to be converted to success/fail - percentage correct could be the quality measure for the model.
 
 **e)** Another approach would be to apply a contingency table test to investigate whether factor passenger class (and gender) has an effect on the survival status. Implement the relevant test(s).
 
@@ -236,7 +235,7 @@ knitr::kable(tab2)
 
 ```
 
-From the test above we can conclude that both factors have a significant effect on the survival outcome. 
+From the tests above we can conclude that both factors have a significant effect on the survival outcome. 
 
 **f)** Is the second approach in e) wrong? Why or why not? Name both an advantage and a disadvantage of the two approaches, relative to each other.
 
@@ -263,11 +262,12 @@ numregim - number of regime types.
 ```{r}
 africa <- read.table(file="data/africa.txt", header=TRUE)
 africa$pollib <- as.factor(africa$pollib)
-poisson_model <- glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec+numregim,family=poisson,data=africa)
+poisson_model <- glm(miltcoup~oligarchy+pollib+parties+pctvote+popn+size+numelec+numregim,
+                     family=poisson,data=africa)
 summary(poisson_model)
 ```
 
-When inspecting the above summary of the poisson regression for the whole dataset with miltcoup as response variable, we see that only three variables show significant influence. Namely the variables oligarchy, pollib and parties show a P-value<0.05. For the pollib factor variable we also see that the pollib2 level (full civil rights) has a significant influence with in contrast to pollib1 (limited civil rights). Furthermore, de number of legislative and presidential elections (numelec) and the number of regime types seem to have the least influence on the number of coups.
+When inspecting the above summary of the poisson regression for the whole dataset with miltcoup as response variable, we see that only three variables show significant influence. Namely the variables oligarchy, pollib and parties show a p-value < 0.05. For the pollib factor variable we also see that only pollib2 level (full civil rights) has a significant influence. Furthermore, the number of legislative and presidential elections (numelec) and the number of regime types seem to have the least influence on the number of coups.
 
 **b)** Use the step down approach (using output of the function summary) to reduce the number of explanatory variables. Compare the resulting model with your findings in a).
 ```{r echo = T, results = 'hide'}
@@ -303,17 +303,9 @@ In the final_poisson model we are left with the same three variables as were alr
 new_data <- africa %>% mutate_if(is.numeric, mean) %>% select(-pollib, -miltcoup)
 new_data <- new_data[1,]
 avg_oligarchy <- new_data$oligarchy; avg_parties <- new_data$parties;
-avg_pctvote <- new_data$pctvote; avg_popn <- new_data$popn;
-avg_size <- new_data$size; avg_numelec <- new_data$numelec;
-avg_numregim <- new_data$numregim
 
 # get a list of political liberalization levels
 pollib <- sort(as.character(unique(africa$pollib)))
-new_data <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
-                        parties = avg_parties, pctvote = avg_pctvote,
-                        popn = avg_popn, size = avg_size,
-                        numelec = avg_numelec, numregim = avg_numregim)
-
 new_data_reduced <- expand.grid(pollib = pollib, oligarchy = avg_oligarchy,
                         parties = avg_parties)
 
@@ -322,5 +314,5 @@ final <- new_data_reduced %>% bind_cols(Prediction = results)
 knitr::kable(final, caption = "Predictions with the model from b)")
 
 ```
-Looking at the predictions from both the full and the reduced model we see that the amount of expected coups decreases with higher levels of political liberalization. In both cases full civil rights (pollib = 2) predicts the lowest number of coups < 1. 
+Looking at the predictions we see that the amount of expected coups decreases with higher levels of political liberalization. In both cases full civil rights (pollib = 2) predicts the lowest number of coups < 1. 
 
