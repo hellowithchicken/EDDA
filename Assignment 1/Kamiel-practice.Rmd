@@ -44,6 +44,24 @@ t.test(data$birthweight, alternative = "greater", mu=2800)
 ```
 ```{r}
 data <- read.table(file="data/run.txt",header=TRUE)
-bef = data$before
-aft = data$before
+data
+bef_limo = data[ which(data$drink=='lemo'),]$before 
+bef_energy =data[ which(data$drink=='energy'),]$before 
+aft_limo = data[ which(data$drink=='lemo'),]$after
+aft_energy =  data[ which(data$drink=='energy'),]$after
+
+aft_limo
+lemo = c()
+energy = c()
+for (i in 1:length(aft_limo))
+  {y = abs(bef_energy[i] - aft_energy[i]); x = abs(bef_limo[i] - aft_limo[i]); lemo = c(lemo,x );energy = c(energy, y); y}
+
+lemo
+energy
+
+hist(lemo)
+hist(energy)
+
+wilcox.test(lemo, energy)
+ks.test(lemo,energy)
 ```
