@@ -1,0 +1,49 @@
+---
+title: "EDDA - Assignment 1 - Group 77"
+subtitle: "Dante de Lang, Ignas Krikštaponis and Kamiel Gülpen"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 3 digits
+options(digits = 3)
+```
+
+# Exercise 1
+The data set birthweight.txt contains the birthweights of 188 newborn babies.  We are interested in finding the underlying (population) mean $\mu$ of birthweights.
+
+**a)** Check normality of the data.  Compute a point estimate for mu.  Derive, assuming normality (irrespective of your conclusion about normality of the data), a bounded 90% confidence interval for $\mu$.
+
+
+To check normality for the data we use a qqplot, historgram, box plot and Shapiro-Wilks test. 
+```{r}
+par(mfrow=c(1,3))
+data <- read.table(file="data/birthweight.txt",header=TRUE)
+data
+hist(data$birthweight)
+shapiro.test(data$birthweight)
+qqnorm(data$birthweight)
+
+
+
+error = qnorm(0.95)*(sd(data$birthweight)/sqrt(length((data$birthweight))))
+
+ci = c(mean(data$birthweight) - error, mean(data$birthweight) + error)
+ci
+```
+```{r}
+t.test(data$birthweight, alternative = "greater", mu=2800)
+```
+```{r}
+data <- read.table(file="data/run.txt",header=TRUE)
+bef = data$before
+aft = data$before
+```
