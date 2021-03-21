@@ -1,0 +1,104 @@
+---
+title: "2020 - Exam"
+output: pdf_document
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi)
+library(lme4)
+library(car)
+library(gridExtra)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 3 digits
+options(digits = 3)
+```
+
+# Exercise Trees
+
+**a)**
+
+```{r, fig.width = 12, fig.height=6}
+# read the data
+data <- read.table(file="treeVolume.txt", header=TRUE)
+data$type <- as.factor(data$type)
+# perform one way-anova
+model <- lm(volume~type, data = data)
+anova(model)
+summary(model)
+par(mfrow=c(1,2));
+plot(model, 1); plot(model, 2)
+```
+
+From the one-way ANOVA test above we can conclude that there is no significant effect of tree type on the volume. The estimate for $beech$ type is 30.17, for $oak$ type it is 30.17 + 5.08 = 35.25. 
+Test diagnostics: Residuals vs Fitted plot look acceptable. QQ-plot poorly follows a straight line, therefore the normality here is questionable. It might be better to perfom a different test here too.
+
+**b)**  
+```{r}
+# perform ancova
+model <- lm(volume~diameter+height+type, data = data)
+anova(model)
+summary(model)
+```
+ANCOVA analysis brings us to the same conclusion - there is no significant effect of the tree type on the volume. From the coefficients in the summary table it seems that oak type insignificantly results in a smaller volume. 
+
+```{r, fig.width = 12, fig.height=6}
+# diagnostics
+par(mfrow=c(1,2));
+plot(model, 1); plot(model, 2)
+```
+
+Diagnostics: from Residuals vs fitted we see some outliers that could raise doubts about normality of the data, however there does not seem to be any obvious relationship if these outliers would be removed. QQ-plot seems to follow a straight line pretty well (with some outliers).
+
+```{r}
+# perform predictions
+avg_diameter <- mean(data$diameter); avg_height <- mean(data$height)
+types <- unique(as.character(data$type))
+new_data <- expand.grid(diameter = avg_diameter, height = avg_height, 
+                        type = types)
+results <- predict(model, new_data, type="response")
+final <- new_data %>% bind_cols('Estimated volume' = results)
+knitr::kable(final)
+```
+
+**c)**
+```{r, fig.width = 12, fig.height=6}
+# plot to see relationship
+plot(diameter~volume, data = data)
+cor.test(data$diameter, data$volume)
+# diagnostics
+par(mfrow=c(1,2)); qqnorm(data$diameter); qqnorm(data$volume)
+```
+
+From the plot above there seems to be an obvious positive linear relationship between volume and diameter. By performing Pearson correlation test we see that there is significant positive correlation between the two variables. Test diagnostics confirm normality of the data
+
+```{r}
+# perform ANCOVA with interaction 
+model <- lm(volume ~ type*diameter, data = data)
+anova(model)
+```
+
+From the p-value for interaction we see that it is >0.05, therefore there is no interaction between diameter and type i.e. the hypothesis that the diameter influences volume in the same way based on the tree type is not rejected.
+
+ **d)**
+```{r}
+# create new variable
+data_1 <- data %>% mutate(new_var = (diameter/2)**2*pi*height)
+
+# perform ancova
+model <- lm(volume~new_var+type, data = data_1)
+anova(model)
+summary(model)
+```
+
+The new varialbe introduced is the calculated volume from the provided data. This results in a bettwe fit - from $b)$ the r-squared is 0.948, here it is 0.974.
+
+```{r, fig.width = 12, fig.height=6}
+# diagnostics
+par(mfrow=c(1,2));
+plot(model, 1); plot(model, 2)
+```
+Diagnostics: Fitted vs Residuals seems to not produce any obvious relationship. qq-plot follows are straight line very well. The assumptions are met.
