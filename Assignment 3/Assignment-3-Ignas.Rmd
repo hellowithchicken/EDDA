@@ -31,7 +31,7 @@ data_flies$activity <- as.factor(data_flies$activity)
 data_flies <- data_flies %>% mutate(loglongevity = log(longevity))
 # make informative plot - boxplot
 par(mfrow=c(1,2));
-plot(data_flies$loglongevity~data_flies$activity)
+# plot(data_flies$loglongevity~data_flies$activity)
 plot(loglongevity~thorax,pch=as.character(activity), data=data_flies)
 ```
 From the boxplot we can see that there could be a significant difference in the means of loglongevity for high sexual activity level. In the scatter plot on the right there seems to be a positive relationship between thorax and loglongevity, however any clear influence of the sexual activity level can not be observed.
@@ -140,7 +140,7 @@ QQ-plot seems to be following a straight line better than the additive model wit
 On April 15, 1912, British passenger liner Titanic sank after colliding with an iceberg. There were not enough lifeboats for everyone onboard, resulting in the death of 1502 out of 2224 passengers and crew. The data file titanic.txt gives the survival status of passengers on the Titanic, together with their names, age, sex and passenger class. (About half of the ages for the 3rd class passengers are missing, although many of these could be filled in from the original source.) The columns: Name { name of passenger; PClass - passenger class (1st, 2nd or 3rd), Age - age in years, Sex - male or female, Survived - survival status (1=Yes or 0=No).
 
 **a)** Study the data and give a few (>1) summaries (graphics or tables).
-<<<<<<< HEAD
+
 ```{r, warning=F}
 par(mfrow=c(1,3))
 titanic <- read.table(file="data/titanic.txt", header=TRUE)
@@ -222,7 +222,7 @@ Split data into training and testing data. Train the logistic regression model o
 ```{r}
 # Makes a contingency table and chi-squared test for survived with class and gender
 tab1 = table(titanic$Survived,titanic$Sex)
-chisq.test(tab1)
+fisher.test(tab1)
 total_s= rowSums(rbind(tab1,NaN));total_g = colSums(tab1);
 tab1 = rbind(tab1,total_g);tab1 = cbind(tab1,total_s)
 knitr::kable(tab1)
@@ -230,17 +230,18 @@ knitr::kable(tab1)
 
 tab2 = table(titanic$Survived,titanic$PClass)
 chisq.test(tab2)
-total_c= rowSums(rbind(tab2,NaN));total_g = colSums(tab2);
+
+total_c= rowSums(tab2);total_g = colSums(tab2);
 tab2 = rbind(tab2,total_g);tab2 = cbind(tab2,total_s)
 knitr::kable(tab2)
 
 ```
 
-From the test above we can conclude that both factors have a significant effect on the survival outcome. 
+The Fischer test is used for the contingency tables when the effect of sex on survival is investigated because. This could be done because it us a 2x2 contingency table. For the influence of the class on survival a Chi-square test is conducted because of the 2x3 table, this test reliable because more than 80% of the values have a value of more than 5. The tests tests above we show that both factors have a significant effect on the survival outcome. 
 
 **f)** Is the second approach in e) wrong? Why or why not? Name both an advantage and a disadvantage of the two approaches, relative to each other.
 
-The second approach is not necessary wrong as we want to know whether or not the Survived variable is independent of the variables gender and class. The approach in e (the contingency table with the chi-squared test) is for that question suitable. 
+The second approach is not necessary wrong as we want to know whether or not the Survived variable is independent of the variables gender and class. The approach in e (the contingency table with the Fisher and chi-squared test) is for that question suitable.
 
 Whether you want to use the contingency table with the chi-squared test depends generally on which question we want to answer. A advantage of the Chi-squared is that the test can be used when we want to know if the reason that a person survived is independent of their sex or class, as mentioned above. While the logistic regression has the advantage that it could compute the probability that a person with a certain, age, class and gender survives or not. 
 
