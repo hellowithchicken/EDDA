@@ -36,7 +36,6 @@ The estimated volumes are for Beech 30.17 and for oak 35.26.
 ```{r}
 
 fiber1=lm(volume~diameter+height+type,data=data)
-fiber1=lm(volume~diameter*height*type,data=data)
 plot(fiber1, 1)
 plot(fiber1, 2)
 drop1(fiber1,test="F")
