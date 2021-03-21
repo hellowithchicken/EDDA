@@ -1,0 +1,73 @@
+---
+title: "EDDA -Prctice"
+subtitle: "Kamiel Gülpen"
+output: pdf_document
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi)
+library(lme4)
+library(car)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 3 digits
+options(digits = 3)
+```
+
+
+# Exercise 1
+
+```{r}
+data <- read.table(file="treeVolume.txt", header=TRUE)
+
+
+data$type=as.factor(data$type)
+dataaov=lm(volume~type,data=data)
+plot(dataaov, 1)
+plot(dataaov, 2)
+anova(dataaov) 
+summary(dataaov)
+```
+The estimated volumes are for Beech 30.17 and for oak 35.26.
+
+```{r}
+
+fiber1=lm(volume~diameter+height+type,data=data)
+fiber1=lm(volume~diameter*height*type,data=data)
+plot(fiber1, 1)
+plot(fiber1, 2)
+drop1(fiber1,test="F")
+summary(fiber1)
+
+# Taking the averages
+a_height = sum(data$height)/59
+a_diameter = sum(data$diameter)/59
+
+a_height
+a_diameter
+
+Oak = -63.7814 + 1 * -1.3046 + a_diameter * 4.6981 + a_height * 0.4172
+
+Beech = -63.7814 + a_diameter * 4.6981 + a_height * 0.4172
+
+Oak
+Beech
+```
+Alsso in this model the type is insignificant. The estimate of the tree can be found by doing the following: Y = -63.7814 + typeoak * -1.3046 + diameter * 4.6981 + height * 0.4172. This means tha ta Oak has a volume of 31.9 and Beech a volume of 33.2
+
+```{r}
+trees = c("beech", "oak")
+plot(data$volume~data$diameter,pch=unclass(data$type));for (i in trees){abline(lm(volume~diameter,data=data[data$type==i,]))}
+```
+
+We see that the diameter has a strong effect on the volume of both trees, a little bit more on Beech than Oak
+
+```{r}
+data$logheight = log(data$height)
+fiber1=lm(volume~logheight+diameter+type,data=data)
+plot(fiber1, 2)
+plot(fiber1, 1)
+```
