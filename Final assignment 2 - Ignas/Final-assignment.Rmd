@@ -1,0 +1,232 @@
+---
+title: "EDDA - Final Assignment 2"
+subtitle: "Ignas Krikštaponis"
+output: pdf_document
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rstudioapi)
+library(lme4)
+library(car)
+library(gridExtra)
+
+knitr::opts_chunk$set(echo = TRUE)
+setwd(dirname(getActiveDocumentContext()$path))
+# round numbers to 3 digits
+options(digits = 3)
+```
+
+
+# Forest
+
+```{r, fig.width = 12, fig.height=6}
+# read the data
+data <- read.table(file="data/treeVolume.txt", header=TRUE)
+# make the variables as factors
+data$type <- as.factor(data$type)
+```
+
+***a)***
+
+```{r}
+model <- lm(volume~type, data = data)
+anova(model)
+summary(model)
+```
+
+From the ANOVA results (p-values > 0.05) we can conclude that there is no significant influence of tree type on the volume. For type = beech the estimate is 30.17, for type = oak it is 30.17 + 5.08 = 35.2. Let's do diagnostics.
+
+```{r, fig.width = 12, fig.height=6}
+par(mfrow = c(1,2))
+plot(model, 1); plot(model, 2)
+```
+From the diagnostics we can see that the qq plot does not follow a straight line well, therefore the ANOVA assumptions are invalidated and the analysis with ANOVA is not correct.
+
+***b)***
+
+```{r}
+## t-test check normality
+# filter data for types
+
+oak <- data %>% filter(type == "oak")
+beech <- data  %>% filter(type == "beech")
+
+shapiro.test(oak$volume); shapiro.test(beech$volume)
+
+```
+
+Yes, a t-test could be related to the test in a) - we could filter the data into two samples for two tree types and then perform a two-sample non-paired t-test. However, as we can see from Shapiro test that the normality assumption is invalidated, therefore a t-test should not be applied here. All the other three mentioned test can be applied since they do not require the data to be normal, however the Mann-Whitney test would check for median not the mean.
+
+```{r}
+# perform Mann-Whitney
+wilcox.test(oak$volume, beech$volume)
+# perform Kolmogorov-Smirnoff
+ks.test(oak$volume, beech$volume)
+```
+
+From the Wilcoxon test results we can see that the p-value < 0.05, therefore the medians among the two samples are significantly different. From Kolmogorov-Smirnov we have p-value < 0.05 and we can say that the means are significantly different. This contradict the results in a). Let's perform a permutation test:
+
+```{r}
+mystat <- function(x) sum(residuals(x)^2)
+B <- 1000
+tstar <- numeric(B)
+for (i in 1:B) {treatstar <- sample(data$type)
+tstar[i] <- mystat(lm(data$volume~treatstar)) }
+myt <- mystat(lm(data$volume~data$type))
+```
+
+```{r}
+pl <- sum(tstar<myt)/B
+pr <- sum(tstar>myt)/B
+2*min(pl,pr)
+```
+
+From the results of the permutation test we see that p-value > 0.05, therefore the effect of type is insignificant - this aggress with a).
+
+***c)***
+
+```{r}
+# perform ANCOVA
+model <- lm(volume~diameter+height+type, data = data)
+anova(model)
+summary(model)$r.squared
+```
+
+Here we performed ANCOVA. The outcome is the same as in a) - the effect of type is insignificant (p-value > 0.05). However, we can see that diameter and height do have a significant influence on volume. Let's do diagnostics.
+
+```{r, fig.width = 12, fig.height=6}
+par(mfrow = c(1,2))
+plot(model, 1); plot(model, 2)
+```
+
+From the diagnostics we can see that there are some outliers in the qqplot. Also there is obvious relationship in the residuals vs fitted plot, therefore the ANCOVA analysis is not valid.
+
+```{r}
+# perform predictions
+new_data <- data.frame(type = c("oak", "beech"), 
+                       diameter = mean(data$diameter),
+                       height = mean(data$height))
+
+predict(model, new_data, type = "response")
+```
+
+From the results above - estimate for oak = 31.9, estimate for beech = 33.2.
+
+***d)***
+
+Start analysis with diameter:
+
+```{r}
+# check normality
+shapiro.test(data$volume)
+shapiro.test(data$diameter)
+
+# perform correlation test
+cor.test(data$volume, data$diameter, method = "spearman")
+plot(volume~diameter, data = data)
+```
+We perform a Spearman corelation since the data is not normal (from shapiro test we see that one p-value < 0.05). From the results we can see that there is a significant positive correlation between the variables - meaning as diameter increases volume increases too. 
+
+Now we will perform ANCOVA with interaction to see if the influence of diameter on volume is the same under all tree types.
+
+```{r}
+model <- lm(volume~type*diameter, data = data)
+anova(model)
+summary(model)
+```
+
+From the results above we can see that the interaction influence is not significant, therefore we can assume that the influence of diameter is similar under both tree types. Let's do diagnostics.
+
+```{r, fig.width = 12, fig.height=6}
+par(mfrow = c(1,2))
+plot(model, 1); plot(model, 2)
+```
+
+The qqplot follows a straight line pretty well. The residuals vs fitted does not seem to have any obvious relationship, there are some outliers that could be removed to improve the performace. The model assumptions are met.
+
+Start analysis with height:
+
+```{r}
+# perform correlation test
+cor.test(data$volume, data$height, method = "spearman")
+plot(volume~height, data = data)
+```
+
+From analysis before we know that Volume can not be assumed to be normally distributed, therefore we also perform a spearman correlation test. The correlation is positive (and significan) here also. Let's performe ANCOVA with interaction.
+
+```{r}
+model <- lm(volume~type*height, data = data)
+anova(model)
+summary(model)
+```
+
+From the results above we can see that the interaction influence is now significant, therefore we can assume that the influence of diameter is different under two different tree types. Let's do diagnostics.
+
+```{r, fig.width = 12, fig.height=6}
+par(mfrow = c(1,2))
+plot(model, 1); plot(model, 2)
+```
+
+The qqplot follows a straight line pretty well. From residuals vs fitted, however, we can see that there is wider spread of values for higher values of height. The assumptions are not valid for this analysis.
+
+***e)***
+
+Let's create a new variable which is just mathematically calculated volume.
+
+```{r}
+# let's create a new variable - calculated volume
+
+data <- data %>% 
+  mutate(c_volume = height * (diameter/2)**2*pi)
+
+```
+
+Let's fist perform ANCOVA with interaction.
+
+```{r}
+model <- lm(volume~type*c_volume, data = data)
+anova(model)
+```
+
+From the results we can see that the interaction effect is insignificant. Let's do diagnostics.
+
+```{r, fig.width = 12, fig.height=6}
+par(mfrow = c(1,2))
+plot(model, 1); plot(model, 2)
+```
+
+From diagnostics we don't see any relationships in the residuals vs fitted plot. qqplot also follows the line very well, therefore the assumptions are met.
+
+As there is no interaction, let's move on to the additive model.
+
+```{r}
+model <- lm(volume~c_volume+type, data = data)
+anova(model)
+```
+
+As previously, the effect of type is insignificant. Let's do diagnostics:
+
+```{r, fig.width = 12, fig.height=6}
+par(mfrow = c(1,2))
+plot(model, 1); plot(model, 2)
+```
+
+From diagnostics we don't see any relationships in the residuals vs fitted plot. qqplot also follows the line very well, therefore the assumptions are met. Let's now remove type from the model - this will create a linear model.
+
+```{r}
+model <- lm(volume~c_volume, data = data)
+summary(model)
+```
+
+From the results we can see that the influence of c_volume is significant. Let's do diagnostics.
+
+```{r, fig.width = 12, fig.height=6}
+par(mfrow = c(1,2))
+plot(model, 1); plot(model, 2)
+```
+
+From diagnostics we don't see any relationships in the residuals vs fitted plot. qqplot also follows the line very well, therefore the assumptions are met. 
+
+From the r-squared value here (0.974) in comparison to what we had in d) with height (0.285) or d) with diameter (0.924) or c) (0.951), we can conclude that this model is more accurate (and therefore better).
